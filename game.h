@@ -5,14 +5,16 @@
 #pragma once
 #include <string.h>
 #include <stdbool.h>
+#include <curses.h>
 #include "ui.h"
+#include "game.h"
 #include "krono.h"
+
 
 typedef struct {
     char name[64];
     int popularity;
     int fullness;
-
 } Player;
 
 typedef enum {
@@ -30,15 +32,16 @@ typedef enum {
 
 typedef struct {
     Player player;
-    GameOverReason go_reason,
-    bool player_valid
+    Settings settings;
+    GameOverReason go_reason;
+    bool player_valid;
 } Game;
 
 /* lifecycle helpers */
-static void game_reset_to_new_run(Game *g);
+void game_reset_to_new_run(Game*);
 
 /* scene functions */
-static GameState scene_title(Game *g);
-static GameState scene_ask_name(Game *g);
-static GameState scene_bedroom(Game *g);
-static GameState scene_game_over(Game *g);
+GameState scene_title(Game*);
+GameState scene_ask_name(Game*);
+GameState scene_bedroom(Game*);
+GameState scene_game_over(Game*);
