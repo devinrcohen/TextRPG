@@ -2,7 +2,27 @@
 // Created by devinrcohen on 2/11/26.
 //
 
+#include <stdarg.h>
+#include <stdio.h>
 #include "ui.h"
+
+int mvw_trickle(WINDOW* win, int row, int col, uint64_t trickle_ms, const char* fmt, ...) {
+    va_list ap;
+    char buf[512];
+    int maxlen = sizeof(buf);
+    va_start(ap, fmt);
+    vsnprintf(buf, maxlen, fmt, ap);
+    va_end(ap);
+    int len = strlen(buf);
+    int last_col = col;
+    for (int i = 0; i < len; ++i, ++last_col) {
+        mvwaddch(win, row, col+i, buf[i]);
+        delay_ms(trickle_ms);
+        refresh();
+    }
+    //return last_col;
+    return last_col;
+}
 
 void mvaddstr_pt(const point yx, const char* str) {
     mvaddstr(yx.y, yx.x, str);
@@ -42,10 +62,28 @@ void wPrintToCenterX(WINDOW* win, int col, const char* str) {
  *
  */
 
-void wPrintToCenterY(WINDOW* win, int row, const char* str) {
+static void vwPrintToCenterY(WINDOW* win, int row, const char* fmt, va_list ap) {
     int xMax = getmaxx(win);
-    int len = (int)strlen(str);
-    mvwaddstr(win, row, (xMax-len)/2, str);
+    char buf[512];
+    vsnprintf(buf, sizeof(buf), fmt, ap);
+
+    int len = (int)strlen(buf);
+    int col = (xMax - len)/2;
+    mvwprintw(win, row, col, "%s", buf);
+}
+
+/**
+ *
+ * @param win pointer to window on which to place string
+ * @param row row at which to place string on y-axis
+ * @param fmt string to place
+ * @param ...
+ */
+void wPrintToCenterYf(WINDOW* win, int row, const char* fmt, ...) {
+    va_list ap;
+    va_start(ap, fmt);
+    vwPrintToCenterY(win, row, fmt, ap);
+    va_end(ap);
 }
 
 /**
@@ -53,15 +91,29 @@ void wPrintToCenterY(WINDOW* win, int row, const char* str) {
  *
  * @param win pointer to window on which to place string
  * @param offset vertical offset from center (negative to move up, positive to move down)
- * @param str string to place
+ * @param fmt string to place
+ * @param ...
  */
-void wPrintToCenter_Offset(WINDOW* win, int offset, const char* str) {
+void wPrintToCenter_Offsetf(WINDOW* win, int offset, const char* fmt, ...) {
     int yMax = getmaxy(win);
-    wPrintToCenterY(win, yMax/2 + offset, str);
+
+    va_list ap;
+    va_start(ap, fmt);
+    vwPrintToCenterY(win, yMax/2 + offset, fmt, ap);
+    va_end(ap);
 }
 
-void wPrintToCenter(WINDOW* win, const char* str) {
-    wPrintToCenter_Offset(win, 0, str);
+/**
+ *
+ * @param win pointer to window on which to place string
+ * @param fmt
+ * @param ...
+ */
+void wPrintToCenterf(WINDOW* win, const char* fmt, ...) {
+    va_list ap;
+    va_start(ap, fmt);
+    vwPrintToCenterY(win, getmaxy(win)/2, fmt, ap);
+    va_end(ap);
 }
 
 /**
@@ -94,8 +146,14 @@ void delay_ms(uint64_t ms) {
     krono_sleep_ns(1000000*ms);
 }
 
-void ui_init() {
+void ui_init(Settings* settings) {
     initscr();
+    int yMax, xMax;
+    settings->mainWindow = stdscr;
+    getmaxyx(stdscr, yMax, xMax);
+    settings->yMax = yMax;
+    settings->xMax = xMax;
+
     if (has_colors()) {
         start_color();
         init_pair(1, COLOR_YELLOW, COLOR_BLACK);
@@ -105,6 +163,9 @@ void ui_init() {
     }
     cbreak();
     keypad(stdscr, TRUE);
+    mousemask(ALL_MOUSE_EVENTS, NULL);
+    mouseinterval(0);
+    nodelay(stdscr, FALSE);
 }
 
 void ui_clear() {
