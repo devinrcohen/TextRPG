@@ -9,5 +9,5 @@ add_executable(TextRPG main.c
         krono.h
         game.c
         game.h)
-target_compile_options(TextRPG PRIVATE -Wall -Wextra -O3)
+target_compile_options(TextRPG PRIVATE -Wall -Wextra -O0)
 target_link_libraries(TextRPG PRIVATE curses panel)
