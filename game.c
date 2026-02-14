@@ -12,7 +12,7 @@ void game_reset_to_new_run(Game *g) {
 GameState scene_title(Game* g) {
     clear();
     attron(A_UNDERLINE | COLOR_PAIR(3) | A_BOLD);
-    CURSOR_OFF
+    CURSOR_OFF;
     wPrintToCenter_Offsetf(stdscr, -1, "Welcome to [GAME TITLE HERE]");
     attroff(A_UNDERLINE);
     refresh(); // must flush before delay
@@ -38,9 +38,9 @@ GameState scene_ask_name(Game* g) {
     mvprintw(0, 0, "Enter your name: ");
 
     move(1, 0);
-    CURSOR_STRONG
+    CURSOR_STRONG;
     getstr(g->player.name);
-    CURSOR_OFF
+    CURSOR_OFF;
     attroff(COLOR_PAIR(1));
 
     refresh();
@@ -50,19 +50,29 @@ GameState scene_ask_name(Game* g) {
 GameState scene_bedroom(Game* g) {
     clear();
     attron(COLOR_PAIR(0));
-
     DialogBlock block1;
-    dialogStart(&block1, 5, 5);
-
-    addDialogLine(&block1, 0,   0, NEXT,  "Mahm: ");
-    addDialogLine(&block1, 16,  2, WAIT,  "\"%s, it's time to wake up!!\"", g->player.name);
-    addDialogLine(&block1, 0,   0, NEXT,  "%s: ", g->player.name);
-    addDialogLine(&block1, 128, 1, WAIT,  "\"unnnhhhh...\"");
+    dialogStart(&block1, 0, 0);
+    addDialogLine(&block1, 0,   0, (COLOR_PAIR(1) | A_BOLD), NEXT,  "Mahm: ");
+    addDialogLine(&block1, 16,  1, (COLOR_PAIR(2)),          WAIT, "\"%s, it's time to wake up!!\"", g->player.name);
+    addDialogLine(&block1, 0,   0, (COLOR_PAIR(1) | A_BOLD), NEXT,  "%s: ", g->player.name);
+    addDialogLine(&block1, 128, 1, (COLOR_PAIR(2)),          NEXT,  "\"unnnhhhh...\"");
 
     mvwDialogTrickle(g->settings.mainWindow, &block1);
-
     refresh();
     getch();
+    clear();
+
+    DialogBlock block2;
+    dialogStart(&block2, 0, 0);
+
+    addDialogLine(&block2, 0,   0, (COLOR_PAIR(1) | A_BOLD), NEXT,  "Mahm: ");
+    addDialogLine(&block2, 16,  1, (COLOR_PAIR(2)),         NEXT, "\"So... were you planning on going to school today?\"", g->player.name);
+
+    mvwDialogTrickle(g->settings.mainWindow, &block2);
+    refresh();
+    getch();
+    clear();
+
     return ST_QUIT;
 }
 
