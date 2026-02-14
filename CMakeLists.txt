@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 4.1)
 project(TextRPG C)
 
-set(CMAKE_C_STANDARD 23)
+set(CMAKE_C_STANDARD 11)
 
 add_executable(TextRPG main.c
         ui.c
