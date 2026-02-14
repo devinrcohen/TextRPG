@@ -3,13 +3,9 @@
 //
 
 #pragma once
-#include <string.h>
-#include <stdbool.h>
-#include <curses.h>
+
 #include "ui.h"
 #include "game.h"
-#include "krono.h"
-
 
 typedef struct {
     char name[64];
