@@ -2,7 +2,6 @@
 // Created by devinrcohen on 2/11/26.
 //
 
-#include <stdarg.h>
 #include <string.h>
 #include <stdio.h>
 #include "ui.h"
@@ -25,11 +24,12 @@ void dialogStart(DialogBlock* block, int row, int col) {
  * @param block dialog block pointer
  * @param delay_ms delay between each character, in milliseconds
  * @param skipLine number of lines to skip. 0 to stay on same line
+ * @param msk mask for text formatting
  * @param stop WAIT for user to hit enter, NEXT to move to next line of dialog
  * @param fmt formatted string
  * @param ... format args
  */
-void addDialogLine (DialogBlock* block, uint64_t delay_ms, int skipLine, bool stop, const char* fmt, ...) {
+void addDialogLine (DialogBlock* block, uint64_t delay_ms, int skipLine, MASK msk, bool stop, const char* fmt, ...) {
     va_list ap;
     va_start(ap, fmt);
     vsnprintf(block->lines[block->lastLine].str, sizeof(block->lines[block->lastLine].str), fmt, ap);
@@ -37,6 +37,7 @@ void addDialogLine (DialogBlock* block, uint64_t delay_ms, int skipLine, bool st
     block->lines[block->lastLine].delay_ms = delay_ms;
     block->lines[block->lastLine].skipLine = skipLine;
     block->lines[block->lastLine].stop = stop;
+    block->lines[block->lastLine].mask = msk;
     block->lastLine += 1;
 }
 
@@ -75,7 +76,9 @@ point mvwCenterOffsetTrickle(WINDOW* win, int offset, uint64_t trickle_ms, const
 void mvwDialogTrickle(WINDOW* win, DialogBlock* block) {
     point currentStartPoint = block->pStart;
     for (int i=0; i < block->lastLine; ++i) {
+        wattron(win, block->lines[i].mask);
         currentStartPoint = mvwTrickle(win, currentStartPoint.y, currentStartPoint.x, block->lines[i].delay_ms, "%s", block->lines[i].str);
+        wattroff(win, block->lines[i].mask);
         if (block->lines[i].skipLine > 0) {
             currentStartPoint.y += block->lines[i].skipLine;
             currentStartPoint.x = block->pStart.x;
@@ -242,6 +245,5 @@ void ui_clear() {
 }
 
 void ui_shutdown() {
-    getch();
     endwin();
 }
