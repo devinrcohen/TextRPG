@@ -3,12 +3,13 @@
 //
 
 #include <stdarg.h>
+#include <string.h>
 #include <stdio.h>
 #include "ui.h"
 
-int mvw_trickle(WINDOW* win, int row, int col, uint64_t trickle_ms, const char* fmt, ...) {
+point mvwTrickle(WINDOW* win, int row, int col, uint64_t trickle_ms, const char* fmt, ...) {
     va_list ap;
-    char buf[512];
+    char buf[MAX_LENGTH];
     int maxlen = sizeof(buf);
     va_start(ap, fmt);
     vsnprintf(buf, maxlen, fmt, ap);
@@ -20,8 +21,36 @@ int mvw_trickle(WINDOW* win, int row, int col, uint64_t trickle_ms, const char* 
         delay_ms(trickle_ms);
         refresh();
     }
-    //return last_col;
-    return last_col;
+    point last_point = {row, last_col};
+    return last_point;
+}
+
+point mvwCenterOffsetTrickle(WINDOW* win, int offset, uint64_t trickle_ms, const char* fmt, ...) {
+    va_list ap;
+    int yMax, xMax;
+    getmaxyx(win, yMax, xMax);
+    char buf[512];
+    int maxlen = sizeof(buf);
+    va_start(ap, fmt);
+    vsnprintf(buf, maxlen, fmt, ap);
+    int len = strlen(buf);
+    point last_point = mvwTrickle(win, yMax/2+offset, (xMax-len)/2, trickle_ms, "%s", buf);
+    va_end(ap);
+    return last_point;
+}
+
+void mvwDialogTrickle(WINDOW* win, DialogBlock* block) {
+    point currentStartPoint = block->pStart;
+    for (int i=0; i < block->lastLine; ++i) {
+        currentStartPoint = mvwTrickle(win, currentStartPoint.y, currentStartPoint.x, block->lines[i].delay_ms, "%s", block->lines[i].str);
+        if (block->lines[i].skipLine > 0) {
+            currentStartPoint.y += block->lines[i].skipLine;
+            currentStartPoint.x = block->pStart.x;
+        }
+        if (block->lines[i].stop) {
+            getch();
+        }
+    }
 }
 
 void mvaddstr_pt(const point yx, const char* str) {
@@ -83,6 +112,13 @@ void wPrintToCenterYf(WINDOW* win, int row, const char* fmt, ...) {
     va_list ap;
     va_start(ap, fmt);
     vwPrintToCenterY(win, row, fmt, ap);
+    va_end(ap);
+}
+
+void wPrintToCenterYf_trickle(WINDOW* win, int row, uint64_t trickle_ms, const char* fmt, ...) {
+    va_list ap;
+    va_start(ap, fmt);
+    //vwPrintToCenterY(win, row, fmt, ap);
     va_end(ap);
 }
 
