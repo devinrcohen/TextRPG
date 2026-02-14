@@ -16,7 +16,7 @@ GameState scene_title(Game* g) {
     wPrintToCenter_Offsetf(stdscr, -1, "Welcome to [GAME TITLE HERE]");
     attroff(A_UNDERLINE);
     refresh(); // must flush before delay
-    delay_ms(1500);
+    delay_ms(START_DELAY_MS);
 
     wPrintToCenter_Offsetf(stdscr, 1, "Press [Enter] to start");
     wPrintToCenter_Offsetf(stdscr, 2, "Press [Esc] to exit");
@@ -50,19 +50,22 @@ GameState scene_ask_name(Game* g) {
 GameState scene_bedroom(Game* g) {
     clear();
     attron(COLOR_PAIR(0));
-    int next_col = mvw_trickle(g->settings.mainWindow, 0, 0, 16, "Mom: \"%s, it's time to wake up!!\"", g->player.name);
 
-    move(0, next_col);
-    CURSOR_NORMAL
-    getch();
+    DialogBlock block1;
+    block1.pStart.y = 0;
+    block1.pStart.x = 0;
 
-    next_col = mvw_trickle(g->settings.mainWindow, 1, 0, 16, "%s: \"unnnnhhhhh wazup?\" ", g->player.name);
-    int ch = getch();
-    if (ch == KEY_ENTER) {
-        refresh();
-        return ST_ASK_NAME;
-    }
+    DIALOG_START(block1);
+    DIALOG_LINE(block1, 0,   0, NEXT, "Mom: ");
+    DIALOG_LINE(block1, 16,  1, WAIT, "\"%s, it's time to wake up!!\"", g->player.name);
+    DIALOG_LINE(block1, 16,  0, NEXT, "%s: ", g->player.name);
+    DIALOG_LINE(block1, 128, 1, WAIT, "\"unnnhhhh...\"");
+
+
+    mvwDialogTrickle(g->settings.mainWindow, &block1);
+
     refresh();
+    getch();
     return ST_QUIT;
 }
 
