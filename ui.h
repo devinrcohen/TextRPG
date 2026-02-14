@@ -5,6 +5,12 @@
 #pragma once
 
 #define START_DELAY_MS 500
+#define MAX_LINES 20
+#define MAX_LENGTH 100
+
+#include <curses.h>
+#include "krono.h"
+
 
 /** DIALOG_START
  * Initiates dialog block pointer block_name to length 0
@@ -34,11 +40,7 @@ snprintf((block_name).lines[(block_name).lastLine].str, sizeof((block_name).line
 (block_name).lastLine += 1;\
 } while (0)
 
-#define MAX_LINES 20
-#define MAX_LENGTH 100
 
-#include <curses.h>
-#include "krono.h"
 
 #define CURSOR_OFF curs_set(0);
 #define CURSOR_NORMAL curs_set(1);
@@ -73,6 +75,8 @@ typedef struct {
     int lastLine;
 } DialogBlock;
 
+void dialogStart(DialogBlock*, int, int);
+void addDialogLine (DialogBlock*, uint64_t, int, bool, const char*, ...);
 void mvwDialogTrickle(WINDOW*, DialogBlock*);
 point mvwTrickle(WINDOW*, int, int, uint64_t, const char*, ...);
 point mvwCenterOffsetTrickle(WINDOW*, int, uint64_t, const char*, ...);

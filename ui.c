@@ -7,6 +7,39 @@
 #include <stdio.h>
 #include "ui.h"
 
+/**
+ * Initiates dialog block pointer block_name to length 0
+ *
+ * @param block dialog block pointer
+ * @param row starting row
+ * @param col starting column
+ */
+void dialogStart(DialogBlock* block, int row, int col) {
+    block->lastLine = 0;
+    block->pStart.y = row;
+    block->pStart.x = col;
+}
+
+/**
+ *
+ * @param block dialog block pointer
+ * @param delay_ms delay between each character, in milliseconds
+ * @param skipLine number of lines to skip. 0 to stay on same line
+ * @param stop WAIT for user to hit enter, NEXT to move to next line of dialog
+ * @param fmt formatted string
+ * @param ... format args
+ */
+void addDialogLine (DialogBlock* block, uint64_t delay_ms, int skipLine, bool stop, const char* fmt, ...) {
+    va_list ap;
+    va_start(ap, fmt);
+    vsnprintf(block->lines[block->lastLine].str, sizeof(block->lines[block->lastLine].str), fmt, ap);
+    va_end(ap);
+    block->lines[block->lastLine].delay_ms = delay_ms;
+    block->lines[block->lastLine].skipLine = skipLine;
+    block->lines[block->lastLine].stop = stop;
+    block->lastLine += 1;
+}
+
 point mvwTrickle(WINDOW* win, int row, int col, uint64_t trickle_ms, const char* fmt, ...) {
     va_list ap;
     char buf[MAX_LENGTH];

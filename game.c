@@ -52,15 +52,12 @@ GameState scene_bedroom(Game* g) {
     attron(COLOR_PAIR(0));
 
     DialogBlock block1;
-    block1.pStart.y = 0;
-    block1.pStart.x = 0;
+    dialogStart(&block1, 5, 5);
 
-    DIALOG_START(block1);
-    DIALOG_LINE(block1, 0,   0, NEXT, "Mom: ");
-    DIALOG_LINE(block1, 16,  1, WAIT, "\"%s, it's time to wake up!!\"", g->player.name);
-    DIALOG_LINE(block1, 16,  0, NEXT, "%s: ", g->player.name);
-    DIALOG_LINE(block1, 128, 1, WAIT, "\"unnnhhhh...\"");
-
+    addDialogLine(&block1, 0,   0, NEXT,  "Mahm: ");
+    addDialogLine(&block1, 16,  2, WAIT,  "\"%s, it's time to wake up!!\"", g->player.name);
+    addDialogLine(&block1, 0,   0, NEXT,  "%s: ", g->player.name);
+    addDialogLine(&block1, 128, 1, WAIT,  "\"unnnhhhh...\"");
 
     mvwDialogTrickle(g->settings.mainWindow, &block1);
 
