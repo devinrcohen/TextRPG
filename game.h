@@ -10,7 +10,6 @@
 #define DIALOG_INDEX  3
 
 #include "ui.h"
-#include "game.h"
 
 typedef struct {
     char name[64];
