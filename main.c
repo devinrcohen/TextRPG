@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <string.h>
-#include <ncurses.h>
+#include <curses.h>
 #include <panel.h>
 #include <stdint.h>
 #include <stdlib.h>
