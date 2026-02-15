@@ -53,7 +53,8 @@ point mvwTrickle(WINDOW* win, int row, int col, uint64_t trickle_ms, const char*
     for (int i = 0; i < len; ++i, ++last_col) {
         mvwaddch(win, row, col+i, buf[i]);
         delay_ms(trickle_ms);
-        refresh();
+        update_panels();
+        doupdate();
     }
     point last_point = {row, last_col};
     return last_point;
@@ -218,13 +219,14 @@ void delay_ms(uint64_t ms) {
     krono_sleep_ns(1000000*ms);
 }
 
-void ui_init(Settings* settings) {
+void ui_init(UI* ui) {
     initscr();
+    mousemask(ALL_MOUSE_EVENTS, NULL);
+    mouseinterval(0);
     int yMax, xMax;
-    settings->mainWindow = stdscr;
     getmaxyx(stdscr, yMax, xMax);
-    settings->yMax = yMax;
-    settings->xMax = xMax;
+    ui->settings.yMax = yMax;
+    ui->settings.xMax = xMax;
 
     if (has_colors()) {
         start_color();
@@ -234,10 +236,13 @@ void ui_init(Settings* settings) {
         init_pair(4, COLOR_BLUE, COLOR_BLACK);
     }
     cbreak();
-    keypad(stdscr, TRUE);
-    mousemask(ALL_MOUSE_EVENTS, NULL);
-    mouseinterval(0);
-    nodelay(stdscr, FALSE);
+    noecho();
+}
+
+PANEL* ui_add_panel(UI* ui, WINDOW* win, int index) {
+    ui->windows[index] = win;
+    ui->panels[index] = new_panel(win);
+    return ui->panels[index];
 }
 
 void ui_clear() {

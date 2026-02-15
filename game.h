@@ -4,6 +4,11 @@
 
 #pragma once
 
+#define INTRO_INDEX   0
+#define MAIN_INDEX    1
+#define STATUS_INDEX  2
+#define DIALOG_INDEX  3
+
 #include "ui.h"
 #include "game.h"
 
@@ -15,6 +20,7 @@ typedef struct {
 
 typedef enum {
     ST_TITLE,
+    ST_PANEL_TEST,
     ST_ASK_NAME,
     ST_BEDROOM,
     ST_GAME_OVER,
@@ -27,8 +33,9 @@ typedef enum {
 } GameOverReason;
 
 typedef struct {
+    UI ui;
     Player player;
-    Settings settings;
+    //Settings settings;
     GameOverReason go_reason;
     bool player_valid;
 } Game;
@@ -38,6 +45,8 @@ void game_reset_to_new_run(Game*);
 
 /* scene functions */
 GameState scene_title(Game*);
+GameState scene_panel_test(Game*);
 GameState scene_ask_name(Game*);
 GameState scene_bedroom(Game*);
 GameState scene_game_over(Game*);
+;
