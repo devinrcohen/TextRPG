@@ -3,10 +3,19 @@
 //
 
 #include "game.h"
+
+#include <string.h>
+
 #include "ui.h"
+
+#define PLAYER (g->player)
 /* lifecycle helpers */
 void game_reset_to_new_run(Game *g) {
-
+    strcpy(g->player.name, "");
+    g->player.health = 3;
+    g->player.maxHealth = 10;
+    g->player.popularity = 0;
+    g->player.money = 0;
 }
 
 /* scene functions */
@@ -57,25 +66,25 @@ GameState scene_panel_test(Game* g) {
 
 GameState scene_ask_name(Game* g) {
     WINDOW* dialog = g->ui.windows[DIALOG_INDEX];
+    WINDOW* status = g->ui.windows[STATUS_INDEX];
     PANEL* intro_pan = g->ui.panels[INTRO_INDEX];
     bottom_panel(intro_pan);
     update_panels();
     doupdate();
 
-    wclear(dialog);
     wattron(dialog, COLOR_PAIR(1));
-    mvwprintw(dialog, 0, 0, "Enter your name: ");
-    wmove(dialog, 1, 0);
+    mvwprintw(dialog, 1, 1, "Enter your name: ");
+    wmove(dialog, 2, 1);
 
     echo();
     CURSOR_STRONG;
-    wgetnstr(dialog, g->player.name, 20);
+    wgetnstr(dialog, PLAYER.name, 20);
     CURSOR_OFF;
     wattroff(dialog, COLOR_PAIR(1));
     noecho();
+    wp_refresh(dialog, 0, 0);
 
-    update_panels();
-    doupdate();
+    print_status(status, g);
     return ST_BEDROOM;
 }
 
@@ -83,41 +92,45 @@ GameState scene_bedroom(Game* g) {
     WINDOW* main = g->ui.windows[MAIN_INDEX];
     PANEL* intro_pan = g->ui.panels[INTRO_INDEX];
     PANEL* main_pan = g->ui.panels[MAIN_INDEX];
+
     bottom_panel(intro_pan);
     top_panel(main_pan);
-    update_panels();
-    doupdate();
 
-    wclear(main);
+    wp_refresh(main, 0, 0);
+
     wattron(main, COLOR_PAIR(0));
-    DialogBlock block1;
+    DialogBlock block1, block2;
+
     dialogStart(&block1, 1, 1);
     addDialogLine(&block1, 0,   0, (COLOR_PAIR(1) | A_BOLD), NEXT,  "Mahm: ");
     addDialogLine(&block1, 16,  1, (COLOR_PAIR(2)),          WAIT, "\"%s, it's time to wake up!!\"", g->player.name);
     addDialogLine(&block1, 0,   0, (COLOR_PAIR(1) | A_BOLD), NEXT,  "%s: ", g->player.name);
-    addDialogLine(&block1, 128, 1, (COLOR_PAIR(2)),          NEXT,  "\"unnnhhhh...\"");
-
+    addDialogLine(&block1, /*128*/64, 1, (COLOR_PAIR(2)),          NEXT,  "\"unnnhhhh...\"");
     mvwDialogTrickle(main, &block1);
-    update_panels();
-    doupdate();
+
     wgetch(main);
-    wclear(main);
+    wp_refresh(main, 0, 0);
 
-    DialogBlock block2;
     dialogStart(&block2, 1, 1);
-
     addDialogLine(&block2, 0,   0, (COLOR_PAIR(1) | A_BOLD), NEXT,  "Mahm: ");
     addDialogLine(&block2, 16,  1, (COLOR_PAIR(2)),          NEXT, "\"So... were you planning on going to school today?\"", g->player.name);
-
     mvwDialogTrickle(main, &block2);
-    update_panels();
-    doupdate();
+
+    /* END OF SCENE DIALOG */
     wgetch(main);
-    wclear(main);
+    wp_refresh(main, 0, 0);
 
     return ST_QUIT;
 }
 
 GameState scene_game_over(Game* g) {
     return ST_QUIT;
+}
+
+void print_status(WINDOW* win, Game* g) {
+    wp_refresh(win, 0, 0);
+    mvwprintw(win, 1, 1, "%s", PLAYER.name);
+    mvwprintw(win, 2, 1, "Cash: $%d", PLAYER.money);
+    mvwprintw(win, 3, 1, "Fullness: %d/%d", PLAYER.health, PLAYER.maxHealth);
+    mvwprintw(win, 4, 1, "Popularity: %d", PLAYER.popularity);
 }
