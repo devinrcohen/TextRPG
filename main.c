@@ -1,12 +1,5 @@
-#include <stdio.h>
-#include <string.h>
 #include <curses.h>
-#include <panel.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <math.h>
 #include "ui.h"
-#include "krono.h"
 #include "game.h"
 
 
@@ -24,9 +17,6 @@ int main(void) {
  */
     int rowsMax = game.ui.settings.yMax;
     int colsMax = game.ui.settings.xMax;
-
-    float intro_height_ratio = 1.0f;
-    float intro_width_ratio  = 1.0f;
 
     float main_height_ratio = 0.75f;
     float main_width_ratio  = 0.75f;
@@ -62,9 +52,6 @@ int main(void) {
     PANEL* pan_main   = ui_add_panel(&game.ui, win_main,   MAIN_INDEX);
     PANEL* pan_status = ui_add_panel(&game.ui, win_status, STATUS_INDEX);
     PANEL* pan_dialog = ui_add_panel(&game.ui, win_dialog, DIALOG_INDEX);
-
-    point loc_box = {2, 1};
-    SelectBox select_box = new_selectbox(win_status, &game.ui, loc_box, "Yes", "No");
 
     box(win_main, 0, 0);
     box(win_status, 0, 0);
