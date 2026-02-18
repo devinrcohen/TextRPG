@@ -9,21 +9,34 @@
 #define STATUS_INDEX  2
 #define DIALOG_INDEX  3
 
+#define TOTAL_ITEMS 100
+#define ITEM_NAME_LENGTH 20
+#define CHARACTER_NAME_LENGTH 20
+
 #include "ui.h"
 
 typedef struct {
-    char name[64];
+    char name[ITEM_NAME_LENGTH];
+    int quantity;
+} Item;
+
+typedef struct {
+    char name[CHARACTER_NAME_LENGTH];
     int popularity;
     int health;
     int maxHealth;
     int money;
+    Item inventory[TOTAL_ITEMS];
 } Player;
+
+
 
 typedef enum {
     ST_TITLE,
     ST_PANEL_TEST,
     ST_ASK_NAME,
     ST_BEDROOM,
+    ST_GET_DRESSED,
     ST_GAME_OVER,
     ST_QUIT
 } GameState;
@@ -50,4 +63,3 @@ GameState scene_panel_test(Game*);
 GameState scene_ask_name(Game*);
 GameState scene_bedroom(Game*);
 GameState scene_game_over(Game*);
-void print_status(WINDOW*, Game*);
