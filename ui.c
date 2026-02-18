@@ -4,6 +4,7 @@
 
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include "ui.h"
 
 /**
@@ -251,4 +252,60 @@ void ui_clear() {
 
 void ui_shutdown() {
     endwin();
+}
+
+TextEdit* add_textField(WINDOW* win, point location, int width, int capacity) {
+    TextEdit te = {calloc(capacity+1, sizeof(char)), capacity, 0, width, win, location};
+    return &te;
+}
+
+void edit_textedit(TextEdit* te) {
+    WINDOW* win = te->win;
+    const int cap = te->capacity;
+    const int len = strlen(te->text);
+    const char ch = wgetch(win);
+    while (1) {
+        if (len == cap) {
+            break;
+        }
+        switch (ch) {
+            case '\n':
+            case '\r':
+            case KEY_ENTER:
+                break;
+            case KEY_BACKSPACE:
+                te->text[len] = '\0';
+                break;
+
+            default:
+                te->text[len] = ch;
+                break;
+        }
+    }
+}
+
+void delete_textedit(TextEdit* te) {
+    free(te->text);
+}
+
+void wp_refresh(WINDOW* win, char v, char h) {
+    wclear(win);
+    box(win, v, h);
+    update_panels();
+    doupdate();
+}
+
+SelectBox new_selectbox(WINDOW* win, UI* ui, point location, const char *option1, const char *option2) {
+    SelectBox box;
+    strcpy(box.options[0], option1);
+    strcpy(box.options[1], option2);
+    box.location = location;
+    box.win = win;
+    box.selected = 0;
+    box.visible = false;
+    return box;
+}
+
+void render_selectbox(SelectBox* box) {
+
 }

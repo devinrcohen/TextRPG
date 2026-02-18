@@ -65,6 +65,35 @@ typedef struct {
     //int active;   // optional: which panel has focus
 } UI;
 
+enum EditStatus {
+    EDIT_BREAK = 0,
+    EDIT_CONTINUE,
+    EDIT_FULL
+};
+
+typedef struct {
+    char *text;
+    int capacity;
+    int lenchars;
+    int width;
+    WINDOW* win;
+    point location;
+} TextEdit;
+
+typedef struct {
+    char options[2][30];
+    int selected;
+    WINDOW* win;
+    point location;
+    bool visible;
+} SelectBox;
+
+SelectBox new_selectbox(WINDOW*, UI*, point, const char*, const char*);
+void wp_refresh(WINDOW*, char, char);
+TextEdit* add_textfield(WINDOW*, point, int, int);
+void delete_textfield(TextEdit*);
+void edit_textedit(TextEdit*);
+int addch_to_textfield(TextEdit*, char);
 void dialogStart(DialogBlock*, int, int);
 void addDialogLine (DialogBlock*, uint64_t, int, MASK, bool, const char*, ...);
 void mvwDialogTrickle(WINDOW*, DialogBlock*);
