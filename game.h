@@ -14,7 +14,9 @@
 typedef struct {
     char name[64];
     int popularity;
-    int fullness;
+    int health;
+    int maxHealth;
+    int money;
 } Player;
 
 typedef enum {
@@ -48,4 +50,4 @@ GameState scene_panel_test(Game*);
 GameState scene_ask_name(Game*);
 GameState scene_bedroom(Game*);
 GameState scene_game_over(Game*);
-;
+void print_status(WINDOW*, Game*);
