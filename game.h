@@ -62,4 +62,5 @@ GameState scene_title(Game*);
 GameState scene_panel_test(Game*);
 GameState scene_ask_name(Game*);
 GameState scene_bedroom(Game*);
+GameState scene_get_dressed(Game*);
 GameState scene_game_over(Game*);
