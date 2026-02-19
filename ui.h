@@ -16,6 +16,19 @@
 /* more keys */
 #define KEY_ESC_CUSTOM 27
 
+#define RED_ON_BLACK    (COLOR_PAIR(1))
+#define WHITE_ON_BLACK  (COLOR_PAIR(2))
+#define BLUE_ON_BLACK   (COLOR_PAIR(3))
+#define YELLOW_ON_BLACK (COLOR_PAIR(4))
+#define CYAN_ON_BLACK   (COLOR_PAIR(5))
+#define RED_ON_WHITE    (COLOR_PAIR(6))
+#define BLUE_ON_WHITE   (COLOR_PAIR(7))
+
+#define BLOCK(window, format, code) \
+    wattron(window, format); \
+    code  \
+    wattroff(window, format);
+
 #include <stdarg.h>
 #include <curses.h>
 #include <panel.h>

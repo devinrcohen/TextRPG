@@ -30,19 +30,21 @@ void game_reset_to_new_run(Game *g) {
 /* scene functions */
 GameState scene_title(Game* g) {
     WINDOW* main = WINDOWS[INTRO_INDEX];
-    wattron(main, A_UNDERLINE | COLOR_PAIR(3) | A_BOLD);
     CURSOR_OFF;
 
-    wPrintToCenter_Offsetf(main, -1, "Welcome to [GAME TITLE HERE]");
-    wattroff(main, A_UNDERLINE);
+    BLOCK(main, A_UNDERLINE | RED_ON_WHITE | A_REVERSE | A_BOLD,
+        wPrintToCenter_Offsetf(main, -1, "Welcome to [GAME TITLE HERE]");
+    )
+
     update_panels();
     doupdate();
     delay_ms(START_DELAY_MS);
 
-    wPrintToCenter_Offsetf(main, 1, "Press [Enter] to start");
-    wPrintToCenter_Offsetf(main, 2, "Press [q] to exit");
-    wattroff(main, A_BOLD);
-    // refresh();
+    BLOCK(main, BLUE_ON_WHITE | A_REVERSE,
+        wPrintToCenter_Offsetf(main, 1, "Press [Enter] to start");
+        wPrintToCenter_Offsetf(main, 2, "Press [q] to exit");
+    )
+
     update_panels();
     doupdate();
     /* get key-presses */
@@ -81,18 +83,18 @@ GameState scene_ask_name(Game* g) {
     update_panels();
     doupdate();
 
-    wattron(dialog, COLOR_PAIR(1));
+BLOCK(dialog, RED_ON_BLACK | A_BOLD,
     mvwprintw(dialog, 1, 1, "Enter your name: ");
     wmove(dialog, 2, 1);
-
     echo();
     CURSOR_STRONG;
+)
+BLOCK(dialog, WHITE_ON_BLACK,
     wgetnstr(dialog, PLAYER.name, 20);
     CURSOR_OFF;
-    wattroff(dialog, COLOR_PAIR(1));
+)
     noecho();
     wp_refresh(dialog, 0, 0);
-
     print_status(status, g);
     return ST_BEDROOM;
 }
@@ -107,14 +109,14 @@ GameState scene_bedroom(Game* g) {
 
     wp_refresh(main, 0, 0);
 
-    wattron(main, COLOR_PAIR(0));
+    wattron(main, WHITE_ON_BLACK);
     DialogBlock block1, block2;
 
     dialogStart(&block1, 1, 1);
-    addDialogLine(&block1, 0,   0, (COLOR_PAIR(1) | A_BOLD), NEXT,  "Mahm: ");
-    addDialogLine(&block1, 16,  1, (COLOR_PAIR(2)),          WAIT, "\"%s, it's time to wake up!!\"", PLAYER.name);
-    addDialogLine(&block1, 0,   0, (COLOR_PAIR(1) | A_BOLD), NEXT,  "%s: ", PLAYER.name);
-    addDialogLine(&block1, /*128*/64, 1, (COLOR_PAIR(2)),          NEXT,  "\"unnnhhhh...\"");
+    addDialogLine(&block1, 0,   0, (RED_ON_BLACK | A_BOLD),   NEXT,  "Mahm: ");
+    addDialogLine(&block1, 16,  1, (WHITE_ON_BLACK),          WAIT, "\"%s, it's time to wake up!!\"", PLAYER.name);
+    addDialogLine(&block1, 0,   0, (CYAN_ON_BLACK | A_BOLD),   NEXT,  "%s: ", PLAYER.name);
+    addDialogLine(&block1, /*128*/64, 1, (WHITE_ON_BLACK),    NEXT,  "\"unnnhhhh...\"");
     mvwDialogTrickle(main, &block1);
 
     wgetch(main);
@@ -123,8 +125,8 @@ GameState scene_bedroom(Game* g) {
     while (!go_to_school) {
         wp_refresh(main, 0, 0);
         dialogStart(&block2, 1, 1);
-        addDialogLine(&block2, 0,   0, (COLOR_PAIR(1) | A_BOLD), NEXT,  "Mahm: ");
-        addDialogLine(&block2, 16,  1, (COLOR_PAIR(2)),          NEXT, "\"So %s... were you planning on going to school today?\"", PLAYER.name);
+        addDialogLine(&block2, 0,   0, (RED_ON_BLACK | A_BOLD), NEXT,  "Mahm: ");
+        addDialogLine(&block2, 16,  1, (WHITE_ON_BLACK),         NEXT, "\"So %s... were you planning on going to school today?\"", PLAYER.name);
         mvwDialogTrickle(main, &block2);
 
         // Place menu under the dialog; adjust coordinates to taste
@@ -137,11 +139,16 @@ GameState scene_bedroom(Game* g) {
 
         DialogBlock block3;
         dialogStart(&block3, 1, 1);
-        addDialogLine(&block3, 0,   0, (COLOR_PAIR(1) | A_BOLD), NEXT,  "Mahm: ");
-        addDialogLine(&block3, 16,  1, (COLOR_PAIR(2)),          WAIT, "\"Um, I don't think so...\"");
+        addDialogLine(&block3, 0,   0, (RED_ON_BLACK | A_BOLD), NEXT,  "Mahm: ");
+        addDialogLine(&block3, 16,  1, (WHITE_ON_BLACK),          WAIT, "\"Um, I don't think so...\"");
         mvwDialogTrickle(main, &block3);
     }
     return ST_GET_DRESSED;
+}
+
+GameState scene_get_dressed(Game* g) {
+
+    return ST_QUIT;
 }
 
 GameState scene_game_over(Game* g) {
@@ -150,7 +157,9 @@ GameState scene_game_over(Game* g) {
 
 static void print_status(WINDOW* win, Game* g) {
     wp_refresh(win, 0, 0);
+BLOCK(win, CYAN_ON_BLACK | A_BOLD,
     mvwprintw(win, 1, 1, "%s", PLAYER.name);
+)
     mvwprintw(win, 2, 1, "Cash: $%d", PLAYER.money);
     mvwprintw(win, 3, 1, "Fullness: %d/%d", PLAYER.health, PLAYER.maxHealth);
     mvwprintw(win, 4, 1, "Popularity: %d", PLAYER.popularity);
@@ -179,7 +188,7 @@ static bool yes_no_menu(WINDOW* parent, int y, int x) {
     // Create a small window for the menu (frame + subwindow)
     // Height 3: top/bottom border + content row. Width enough for two labels.
     int h = 3;
-    int w = 18; // adjust if you want more padding
+    int w = 10; // adjust if you want more padding
 
     WINDOW* mw = derwin(parent, h, w, y, x);
     box(mw, 0, 0);
