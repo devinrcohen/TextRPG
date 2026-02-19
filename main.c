@@ -66,12 +66,13 @@ int main(void) {
     /* game loop */
     while (st != ST_QUIT) {
         switch (st) {
-            case ST_TITLE:      st = scene_title(&game);      break;
-            case ST_PANEL_TEST: st = scene_panel_test(&game); break;
-            case ST_ASK_NAME:   st = scene_ask_name(&game);   break;
-            case ST_BEDROOM:    st = scene_bedroom(&game);    break;
-            case ST_GAME_OVER:  st = scene_game_over(&game);  break;
-            default:            st = ST_QUIT;                 break;
+            case ST_TITLE:       st = scene_title(&game);        break;
+            case ST_PANEL_TEST:  st = scene_panel_test(&game);   break;
+            case ST_ASK_NAME:    st = scene_ask_name(&game);     break;
+            case ST_BEDROOM:     st = scene_bedroom(&game);      break;
+            case ST_GET_DRESSED: st = scene_get_dressed(&game);  break;
+            case ST_GAME_OVER:   st = scene_game_over(&game);    break;
+            default:             st = ST_QUIT;                   break;
         }
     }
 
