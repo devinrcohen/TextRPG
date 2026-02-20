@@ -37,6 +37,7 @@ typedef enum {
     ST_ASK_NAME,
     ST_BEDROOM,
     ST_GET_DRESSED,
+    ST_BUS_RIDE,
     ST_GAME_OVER,
     ST_QUIT
 } GameState;
@@ -63,4 +64,5 @@ GameState scene_panel_test(Game*);
 GameState scene_ask_name(Game*);
 GameState scene_bedroom(Game*);
 GameState scene_get_dressed(Game*);
+GameState scene_bus_ride(Game*);
 GameState scene_game_over(Game*);

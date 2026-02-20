@@ -71,6 +71,7 @@ int main(void) {
             case ST_ASK_NAME:    st = scene_ask_name(&game);     break;
             case ST_BEDROOM:     st = scene_bedroom(&game);      break;
             case ST_GET_DRESSED: st = scene_get_dressed(&game);  break;
+            case ST_BUS_RIDE:    st = scene_bus_ride(&game);     break;
             case ST_GAME_OVER:   st = scene_game_over(&game);    break;
             default:             st = ST_QUIT;                   break;
         }
