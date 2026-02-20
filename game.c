@@ -147,11 +147,69 @@ GameState scene_bedroom(Game* g) {
 }
 
 GameState scene_get_dressed(Game* g) {
+    WINDOW* dialog = WINDOWS[DIALOG_INDEX];
+    WINDOW* status = WINDOWS[STATUS_INDEX];
+    WINDOW* main = WINDOWS[MAIN_INDEX];
 
-    return ST_QUIT;
+    wp_refresh(main, 0, 0);
+    wp_refresh(dialog, 0, 0);
+
+    DialogBlock block1, block2, block3, block4;
+
+    dialogStart(&block1, 1, 1);
+    addDialogLine(&block1, 16, 1, (RED_ON_BLACK | A_BOLD), WAIT, ">You notice that the bus will arrive in just 10 minutes.");
+    addDialogLine(&block1, 16, 1, (RED_ON_BLACK | A_BOLD), NEXT, ">You shower quickly but before you walk out the door,");
+    addDialogLine(&block1, 16, 2, (RED_ON_BLACK | A_BOLD), WAIT, " you realize that your hair is a mess!");
+    mvwDialogTrickle(main, &block1);
+
+    dialogStart(&block2, 1, 1);
+    addDialogLine(&block2, 0, 0, (CYAN_ON_BLACK | A_BOLD), NEXT, ">> Style your hair?"); // change to NEXT after testing dialog
+    mvwDialogTrickle(dialog, &block2);
+
+    bool style_hair = yes_no_menu(dialog, 2, 1);   // y=2, x=1 inside border
+    wp_refresh(dialog, 0, 0);
+    wp_refresh(main, 0, 0);
+
+    if (style_hair) {
+        dialogStart(&block3, 1, 1);
+        addDialogLine(&block3, 16, 1, (RED_ON_BLACK | A_BOLD), WAIT, ">You carefully put pomade in your hair. Nice!");
+        addDialogLine(&block3, 0, 0, (CYAN_ON_BLACK | A_BOLD), NEXT, "+3 popularity points gained!");
+        mvwDialogTrickle(main, &block3);
+
+        PLAYER.popularity += 3;
+        wp_refresh(dialog, 0, 0);
+        delay_ms(50);
+        print_status(status, g);
+
+        dialogStart(&block4, 4, 1);
+        addDialogLine(&block4, 16, 1, (RED_ON_BLACK | A_BOLD), NEXT, ">You didn't have time to eat,");
+        addDialogLine(&block4, 16, 0, (RED_ON_BLACK | A_BOLD), WAIT, " but at least you made the bus on time.");
+        mvwDialogTrickle(main, &block4);
+    } else {
+        dialogStart(&block3, 1, 1);
+        addDialogLine(&block3, 16, 1, (RED_ON_BLACK | A_BOLD), NEXT, ">You grab a delicious granola bar");
+        addDialogLine(&block3, 16, 0, (RED_ON_BLACK | A_BOLD), WAIT, " and chomp on it as you run out the door.");
+        mvwDialogTrickle(main, &block3);
+
+        PLAYER.health += 7;
+        wp_refresh(dialog, 0, 0);
+        delay_ms(50);
+        print_status(status, g);
+
+        dialogStart(&block4, 4, 1);
+        addDialogLine(&block4, 0, 2, (CYAN_ON_BLACK | A_BOLD), WAIT, "Hunger curbed.");
+        addDialogLine(&block4, 16, 0, (RED_ON_BLACK | A_BOLD), WAIT, ">You get on the bus with a full stomach and clear head.");
+        mvwDialogTrickle(main, &block4);
+    }
+
+    return ST_BUS_RIDE;
 }
 
 GameState scene_game_over(Game* g) {
+    return ST_QUIT;
+}
+
+GameState scene_bus_ride(Game* g) {
     return ST_QUIT;
 }
 
