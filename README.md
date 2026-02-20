@@ -1,5 +1,5 @@
 # TextRPG
-Welcome to TextRPG! It's your first day of school. Will you be a preppie or a jock? A bully or a geek? A lady's man or a burnout? Are you on your way to Harvard or will you "join the workforce?" Will you become the class president? In TextRPG, you decide your fate. Inspired by the 1990's cult classic DOS test-based RPG, Virtua School, TextRPG is a creative outlet and an excuse for me to learn the curses TUI library and become more efficient in C programming.
+Welcome to TextRPG! It's your first day of school. Will you be a preppie or a jock? A bully or a geek? A lady's man or a burnout? Are you on your way to Harvard or will you "join the workforce?" Will you become the class president? In TextRPG, you decide your fate. Inspired by the 1990's cult classic DOS text-based RPG, Virtua School, TextRPG is a creative outlet and an excuse for me to learn the curses TUI library and become more proficient in C programming.
 
 ## Compiling and Running
 ### Prerequisites
