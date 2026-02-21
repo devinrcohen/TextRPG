@@ -46,18 +46,21 @@ int main(void) {
     WINDOW* win_main   = newwin(rowsMain, colsMain, y0main, x0main);
     WINDOW* win_status = newwin(rowsStatus, colsStatus, y0status, x0status);
     WINDOW* win_dialog = newwin(rowsDialog+1, colsDialog, y0dialog-1, x0dialog);
+    WINDOW* win_quit_alpha = newwin(rowsMax, colsMax, 0, 0);
 
 
     PANEL* pan_intro  = ui_add_panel(&game.ui, win_intro,  INTRO_INDEX);
     PANEL* pan_main   = ui_add_panel(&game.ui, win_main,   MAIN_INDEX);
     PANEL* pan_status = ui_add_panel(&game.ui, win_status, STATUS_INDEX);
     PANEL* pan_dialog = ui_add_panel(&game.ui, win_dialog, DIALOG_INDEX);
+    PANEL* pan_quit_alpha = ui_add_panel(&game.ui, win_quit_alpha, QUIT_ALPHA_INDEX);
 
     box(win_main, 0, 0);
     box(win_status, 0, 0);
     box(win_dialog, 0, 0);
 
     top_panel(pan_intro);
+    bottom_panel(pan_quit_alpha);
     update_panels();
     doupdate();
 
@@ -72,7 +75,9 @@ int main(void) {
             case ST_BEDROOM:     st = scene_bedroom(&game);      break;
             case ST_GET_DRESSED: st = scene_get_dressed(&game);  break;
             case ST_BUS_RIDE:    st = scene_bus_ride(&game);     break;
+            case ST_EMPTY_SEAT:  st = scene_empty_seat(&game);   break;
             case ST_GAME_OVER:   st = scene_game_over(&game);    break;
+            case ST_QUIT_ALPHA:  st = scene_quit_alpha(&game);   break;
             default:             st = ST_QUIT;                   break;
         }
     }

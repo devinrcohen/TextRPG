@@ -24,6 +24,10 @@ void game_reset_to_new_run(Game *g) {
     PLAYER.maxHealth = 10;
     PLAYER.popularity = 0;
     PLAYER.money = 0;
+    for (int i=0; i < NUMBER_OF_CHARACTERS; ++i) {
+        strcpy(g->characters[i].name, "");
+        g->characters[i].met = false;
+    }
     clear_inventory(&PLAYER);
 }
 
@@ -64,7 +68,7 @@ GameState scene_title(Game* g) {
             case 'q':
                 update_panels();
                 doupdate();
-                return ST_QUIT;
+                return ST_QUIT_ALPHA;
             default:
                 break;
         }
@@ -157,7 +161,7 @@ GameState scene_get_dressed(Game* g) {
     DialogBlock block1, block2, block3, block4;
 
     dialogStart(&block1, 1, 1);
-    addDialogLine(&block1, 16, 1, (RED_ON_BLACK | A_BOLD), WAIT, ">You notice that the bus will arrive in just 10 minutes.");
+    addDialogLine(&block1, 16, 1, (RED_ON_BLACK | A_BOLD), WAIT, ">You look at your watch and panic... the bus will arrive in just 10 minutes!!");
     addDialogLine(&block1, 16, 1, (RED_ON_BLACK | A_BOLD), NEXT, ">You shower quickly but before you walk out the door,");
     addDialogLine(&block1, 16, 2, (RED_ON_BLACK | A_BOLD), WAIT, " you realize that your hair is a mess!");
     mvwDialogTrickle(main, &block1);
@@ -183,7 +187,7 @@ GameState scene_get_dressed(Game* g) {
 
         dialogStart(&block4, 4, 1);
         addDialogLine(&block4, 16, 1, (RED_ON_BLACK | A_BOLD), NEXT, ">You didn't have time to eat,");
-        addDialogLine(&block4, 16, 0, (RED_ON_BLACK | A_BOLD), WAIT, " but at least you made the bus on time.");
+        addDialogLine(&block4, 16, 0, (RED_ON_BLACK | A_BOLD), WAIT, " but at least you made the bus lookin' dope.");
         mvwDialogTrickle(main, &block4);
     } else {
         dialogStart(&block3, 1, 1);
@@ -205,11 +209,92 @@ GameState scene_get_dressed(Game* g) {
     return ST_BUS_RIDE;
 }
 
-GameState scene_game_over(Game* g) {
-    return ST_QUIT;
+GameState scene_bus_ride(Game* g) {
+    WINDOW* dialog = WINDOWS[DIALOG_INDEX];
+    WINDOW* status = WINDOWS[STATUS_INDEX];
+    WINDOW* main = WINDOWS[MAIN_INDEX];
+
+    wp_refresh(main, 0, 0);
+    wp_refresh(dialog, 0, 0);
+    wp_refresh(status, 0, 0);
+
+    print_status(status, g);
+    DialogBlock block1, block2, block3, block4;
+
+    dialogStart(&block1, 1, 1);
+    addDialogLine(&block1, 16, 1, (RED_ON_BLACK | A_BOLD), NEXT, ">Luckily, your bus stop is only the second, so you ");
+    addDialogLine(&block1, 16, 2, (RED_ON_BLACK | A_BOLD), WAIT, " have a good pick of seats. You walk slowly toward the back.");
+    addDialogLine(&block1, 16, 0, (RED_ON_BLACK | A_BOLD), NEXT, ">Hmm, where to sit");
+    addDialogLine(&block1, 128, 1, (RED_ON_BLACK | A_BOLD), WAIT, ".....");
+    addDialogLine(&block1, 16, 1, (RED_ON_BLACK | A_BOLD), NEXT, ">There's an empty seat on the third row.");
+    mvwDialogTrickle(main, &block1);
+
+    dialogStart(&block2, 1, 1);
+    addDialogLine(&block2, 0, 0, (CYAN_ON_BLACK | A_BOLD), NEXT, ">> Take the empty seat?"); // change to NEXT after testing dialog
+    mvwDialogTrickle(dialog, &block2);
+    if (yes_no_menu(dialog, 2, 1)) return ST_EMPTY_SEAT;
+
+    // keep moving
+    wp_refresh(main, 0, 0);
+    wp_refresh(dialog, 0, 0);
+
+    dialogStart(&block3, 1, 1);
+    addDialogLine(&block3, 16, 1, (RED_ON_BLACK | A_BOLD), WAIT, ">You keep walking and suddenly see your little buddy snoozing in the back.");
+    addDialogLine(&block3, 16, 1, (RED_ON_BLACK | A_BOLD), NEXT, " You decide to sit down next to him. What is your little buddy's name, again?");
+    mvwDialogTrickle(main, &block3);
+    BLOCK(dialog, CYAN_ON_BLACK | A_BOLD,
+        mvwprintw(dialog, 1, 1, ">> Buddy's name: ");
+        wmove(dialog, 2, 1);
+        echo();
+        CURSOR_STRONG;
+    )
+    BLOCK(dialog, WHITE_ON_BLACK,
+        wgetnstr(dialog, g->characters[BUDDY].name, 20);
+        CURSOR_OFF;
+    )
+    noecho();
+    g->characters[BUDDY].met = true;
+
+    wp_refresh(dialog, 0, 0);
+    print_status(status, g);
+
+    return ST_QUIT_ALPHA;
 }
 
-GameState scene_bus_ride(Game* g) {
+GameState scene_empty_seat(Game* g) {
+
+    return ST_QUIT_ALPHA;
+}
+
+GameState scene_game_over(Game* g) {
+    return ST_QUIT_ALPHA;
+}
+
+GameState scene_quit_alpha(Game* g) {
+    top_panel(g->ui.panels[QUIT_ALPHA_INDEX]);
+    update_panels();
+    doupdate();
+    WINDOW* outro = WINDOWS[QUIT_ALPHA_INDEX];
+
+    CURSOR_OFF;
+
+    BLOCK(outro,  CYAN_ON_BLACK | A_BOLD,
+        wPrintToCenter_Offsetf(outro, -2, "Your game ends here, %s.", PLAYER.name);
+        wPrintToCenter_Offsetf(outro, -1, "This game is in active development.");
+        wPrintToCenter_Offsetf(outro, 0, "For inquiries, contact me at:");
+
+    )
+
+    BLOCK(outro, CYAN_ON_BLACK | A_UNDERLINE,
+        wPrintToCenter_Offsetf(outro, 1, "devin.r.cohen@protonmail.com");
+    )
+
+    BLOCK(outro,  CYAN_ON_BLACK | A_BOLD,
+        wPrintToCenter_Offsetf(outro, 2, "Thank you for playing!");
+        if (g->characters[BUDDY].met)
+            wPrintToCenter_Offsetf(outro, 5, "%s yells \"bye bye!\"", g->characters[BUDDY].name);
+    )
+    wgetch(outro);
     return ST_QUIT;
 }
 
