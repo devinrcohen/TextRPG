@@ -12,4 +12,4 @@ add_executable(TextRPG main.c
         menu.c
         menu.h)
 target_compile_options(TextRPG PRIVATE -Wall -Wextra -O0)
-target_link_libraries(TextRPG PRIVATE curses panel menu)
+target_link_libraries(TextRPG PRIVATE curses panel)
