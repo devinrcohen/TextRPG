@@ -103,6 +103,7 @@ typedef struct {
 
 SelectBox new_selectbox(WINDOW*, UI*, point, const char*, const char*);
 void wp_refresh(WINDOW*, char, char);
+void wp_delete(WINDOW*);
 TextEdit* add_textfield(WINDOW*, point, int, int);
 void delete_textfield(TextEdit*);
 void edit_textedit(TextEdit*);

@@ -298,6 +298,13 @@ void wp_refresh(WINDOW* win, char v, char h) {
     doupdate();
 }
 
+void wp_delete(WINDOW* win) {
+    wclear(win);
+    delwin(win);
+    update_panels();
+    doupdate();
+}
+
 SelectBox new_selectbox(WINDOW* win, UI* ui, point location, const char *option1, const char *option2) {
     SelectBox box;
     strcpy(box.options[0], option1);
