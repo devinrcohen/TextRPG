@@ -4,7 +4,7 @@
 
 #include "game.h"
 
-#include <menu.h>
+#include "menu.h"
 #include <string.h>
 
 #include "ui.h"
@@ -317,101 +317,19 @@ BLOCK(win, CYAN_ON_BLACK | A_BOLD,
 // returns true for Yes, false for No
 static bool yes_no_menu(WINDOW* parent, int y, int x) {
     // Menu items must be NULL-terminated array
-    ITEM* items[3];
-    items[0] = new_item("Yes", "");
-    items[1] = new_item("No",  "");
-    items[2] = NULL;
+    const char *options[] = {"Yes", "No", NULL};
+    WINDOW* menu_win = derwin(parent, 4, 5, y, x);
+    menu* new_menu = initmenu(options);
 
-    MENU* menu = new_menu(items);
-
-    // Keep it simple: 1 row, 2 columns, horizontal-ish
-    set_menu_format(menu, 1, 2);
-    set_menu_mark(menu, "");          // no default ">" mark
-
-    // Create a small window for the menu (frame + subwindow)
-    // Height 3: top/bottom border + content row. Width enough for two labels.
-    int h = 3;
-    int w = 10; // adjust if you want more padding
-
-    WINDOW* mw = derwin(parent, h, w, y, x);
-    box(mw, 0, 0);
-
-    // Subwindow for menu items (inside the border)
-    WINDOW* sub = derwin(mw, 1, w - 2, 1, 1);
-
-    set_menu_win(menu, mw);
-    set_menu_sub(menu, sub);
-
-    // Optional cosmetics
-    // set_menu_fore(menu, A_REVERSE);
-    // set_menu_back(menu, A_NORMAL);
-
-    post_menu(menu);
+    curs_set(0);
+    //keypad(parent, TRUE);
+    OptionSelected picked = poll_menu(menu_win, new_menu);
     update_panels();
     doupdate();
+    delete_menu(new_menu);
 
-    // Drive the menu using parent input
-    keypad(parent, TRUE);
-    for (;;) {
-        int ch = wgetch(parent);
-        switch (ch) {
-            case KEY_LEFT:
-            case KEY_UP:
-                menu_driver(menu, REQ_LEFT_ITEM);
-                break;
-            case KEY_RIGHT:
-            case KEY_DOWN:
-                menu_driver(menu, REQ_RIGHT_ITEM);
-                break;
-
-            // Enter variants
-            case '\n':
-            case '\r':
-            case KEY_ENTER: {
-                ITEM* cur = current_item(menu);
-                const char* name = item_name(cur);
-                bool yes = (name && name[0] == 'Y'); // "Yes"
-                unpost_menu(menu);
-                update_panels();
-                doupdate();
-
-                free_menu(menu);
-                free_item(items[0]);
-                free_item(items[1]);
-
-                delwin(sub);
-                delwin(mw);
-
-                // Important: refresh parent after deleting derived windows
-                update_panels();
-                doupdate();
-                return yes;
-            }
-
-            // ESC cancels: treat as "No" (or handle separately)
-            case 27: {
-                unpost_menu(menu);
-                update_panels();
-                doupdate();
-
-                free_menu(menu);
-                free_item(items[0]);
-                free_item(items[1]);
-
-                delwin(sub);
-                delwin(mw);
-
-                update_panels();
-                doupdate();
-                return false;
-            }
-        }
-
-        // Redraw after any movement
-        wrefresh(mw); // ok to refresh just the menu window here
-        // or, if you want to stay strict about panels:
-        // update_panels(); doupdate();
-    }
+    if (picked.idx == 0) return TRUE;
+    return FALSE;
 }
 
 static void clear_inventory(Player *p) {
