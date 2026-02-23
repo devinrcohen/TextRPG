@@ -8,6 +8,8 @@ add_executable(TextRPG main.c
         ui.h
         krono.h
         game.c
-        game.h)
+        game.h
+        menu.c
+        menu.h)
 target_compile_options(TextRPG PRIVATE -Wall -Wextra -O0)
 target_link_libraries(TextRPG PRIVATE curses panel menu)
