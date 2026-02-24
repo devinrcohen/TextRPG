@@ -109,7 +109,6 @@ OptionSelected poll_menu(WINDOW* win, menu* men) {
                 mvwprint_menu(men, win, men_y, men_x);
                 option_selected.idx = men->selected;
                 option_selected.str = men->options[men->selected];
-                wp_delete(win);
                 return option_selected;
             }
         }
