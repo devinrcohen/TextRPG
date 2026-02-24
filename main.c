@@ -69,15 +69,26 @@ int main(void) {
     /* game loop */
     while (st != ST_QUIT) {
         switch (st) {
-            case ST_TITLE:       st = scene_title(&game);        break;
-            case ST_PANEL_TEST:  st = scene_panel_test(&game);   break;
-            case ST_ASK_NAME:    st = scene_ask_name(&game);     break;
-            case ST_BEDROOM:     st = scene_bedroom(&game);      break;
-            case ST_GET_DRESSED: st = scene_get_dressed(&game);  break;
-            case ST_BUS_RIDE:    st = scene_bus_ride(&game);     break;
-            case ST_EMPTY_SEAT:  st = scene_empty_seat(&game);   break;
-            case ST_GAME_OVER:   st = scene_game_over(&game);    break;
-            case ST_QUIT_ALPHA:  st = scene_quit_alpha(&game);   break;
+            case ST_TITLE:       st = scene_title(&game);        break; // --> ST_ASKNAME
+            case ST_PANELTEST:   st = scene_paneltest(&game);    break;
+            case ST_ASKNAME:     st = scene_askname(&game);      break; // --> ST_BEDROOM
+            case ST_BEDROOM:     st = scene_bedroom(&game);      break; // --> ST_GETDRESSED
+            case ST_GETDRESSED:  st = scene_getdressed(&game);   break; // --> ST_BUSRIDE
+            case ST_BUSRIDE: { // -------------------------> _EMPTYSEAT ---------> ST_BUSRIDE_EXIT
+                st = scene_busride(&game); //      `----> _LITTLEBUDDY ----'
+                while (st != ST_BUSRIDE_EXIT) {
+                    switch (st) {
+                        case ST_BUSRIDE_EMPTYSEAT:      st = scene_busride_emptyseat(&game); break;   // ____
+                        case ST_BUSRIDE_LITTLEBUDDY:    st = scene_busride_littlebuddy(&game); break; // ____\--> ST_BUSRIDE_EXIT
+                        default: st = ST_BUSRIDE_EXIT;
+                    }
+                }
+                st = ST_GAMEOVER; // will change to actual next scene
+                break;
+            }
+            case ST_BUSRIDE_EMPTYSEAT:  st = scene_busride_emptyseat(&game);   break;
+            case ST_GAMEOVER:   st = scene_gameover(&game);    break;
+            case ST_QUITALPHA:  st = scene_quitalpha(&game);   break;
             default:             st = ST_QUIT;                   break;
         }
     }
