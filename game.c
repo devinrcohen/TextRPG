@@ -60,26 +60,26 @@ GameState scene_title(Game* g) {
             case KEY_ENTER:
                 update_panels();
                 doupdate();
-                return ST_ASK_NAME;
+                return ST_ASKNAME;
             case KEY_ESC_CUSTOM:
                 update_panels();
                 doupdate();
-                return ST_PANEL_TEST;
+                return ST_PANELTEST;
             case 'q':
                 update_panels();
                 doupdate();
-                return ST_QUIT_ALPHA;
+                return ST_QUITALPHA;
             default:
                 break;
         }
     }
 }
 
-GameState scene_panel_test(Game* g) {
+GameState scene_paneltest(Game* g) {
 
 }
 
-GameState scene_ask_name(Game* g) {
+GameState scene_askname(Game* g) {
     WINDOW* dialog = WINDOWS[DIALOG_INDEX];
     WINDOW* status = WINDOWS[STATUS_INDEX];
     PANEL* intro_pan = PANELS[INTRO_INDEX];
@@ -147,10 +147,10 @@ GameState scene_bedroom(Game* g) {
         addDialogLine(&block3, 16,  1, (WHITE_ON_BLACK),          WAIT, "\"Um, I don't think so...\"");
         mvwDialogTrickle(main, &block3);
     }
-    return ST_GET_DRESSED;
+    return ST_GETDRESSED;
 }
 
-GameState scene_get_dressed(Game* g) {
+GameState scene_getdressed(Game* g) {
     WINDOW* dialog = WINDOWS[DIALOG_INDEX];
     WINDOW* status = WINDOWS[STATUS_INDEX];
     WINDOW* main = WINDOWS[MAIN_INDEX];
@@ -206,10 +206,10 @@ GameState scene_get_dressed(Game* g) {
         mvwDialogTrickle(main, &block4);
     }
 
-    return ST_BUS_RIDE;
+    return ST_BUSRIDE;
 }
 
-GameState scene_bus_ride(Game* g) {
+GameState scene_busride(Game* g) {
     WINDOW* dialog = WINDOWS[DIALOG_INDEX];
     WINDOW* status = WINDOWS[STATUS_INDEX];
     WINDOW* main = WINDOWS[MAIN_INDEX];
@@ -232,7 +232,7 @@ GameState scene_bus_ride(Game* g) {
     dialogStart(&block2, 1, 1);
     addDialogLine(&block2, 0, 0, (CYAN_ON_BLACK | A_BOLD), NEXT, ">> Take the empty seat?"); // change to NEXT after testing dialog
     mvwDialogTrickle(dialog, &block2);
-    if (yes_no_menu(dialog, 2, 1)) return ST_EMPTY_SEAT;
+    if (yes_no_menu(dialog, 2, 1)) return ST_BUSRIDE_EMPTYSEAT;
 
     // keep moving
     wp_refresh(main, 0, 0);
@@ -258,19 +258,56 @@ GameState scene_bus_ride(Game* g) {
     wp_refresh(dialog, 0, 0);
     print_status(status, g);
 
-    return ST_QUIT_ALPHA;
+    return ST_BUSRIDE_LITTLEBUDDY;
 }
 
-GameState scene_empty_seat(Game* g) {
+GameState scene_busride_emptyseat(Game* g) {
+    WINDOW* dialog = WINDOWS[DIALOG_INDEX];
+    WINDOW* status = WINDOWS[STATUS_INDEX];
+    WINDOW* main = WINDOWS[MAIN_INDEX];
+    //PANEL* dialog_pan = PANELS[DIALOG_INDEX];
 
-    return ST_QUIT_ALPHA;
+    wp_refresh(main, 0, 0);
+    wp_refresh(dialog, 0, 0);
+    wp_refresh(status, 0, 0);
+
+    print_status(status, g);
+    DialogBlock block1, block2, block3, block4;
+
+    dialogStart(&block1, 1, 1);
+    addDialogLine(&block1, 16, 1, (RED_ON_BLACK | A_BOLD), NEXT, ">The bus hums along for about five minutes until you reach the next stop.");
+    addDialogLine(&block1, 16, 2, (RED_ON_BLACK | A_BOLD), WAIT, " The door creaks open and on walks a girl with glasses and a ponytail.");
+    addDialogLine(&block1, 16, 0, (CYAN_ON_BLACK | A_BOLD), NEXT, "???: ");
+    addDialogLine(&block1, 16, 1, (RED_ON_BLACK | A_BOLD), NEXT, "\"Excuse me, may I sit here?\" she asks sweetly.");
+    mvwDialogTrickle(main, &block1);
+
+    //top_panel(dialog_pan);
+    const char *options[] = {"Beat it, dork!", "Sure. What's your name?", NULL};
+    WINDOW* menu1_win = derwin(dialog, 5, 20, 0, 0);
+    //box(menu1_win, 0, 0);
+    menu* new_menu = initmenu(options);
+    //wp_refresh(menu1_win, 0, 0);
+    //wp_refresh(dialog, 0, 0);
+    curs_set(0);
+    OptionSelected girl_answer = poll_menu(menu1_win, new_menu);
+    /* Interpret results here */
+    update_panels();
+    doupdate();
+    delete_menu(new_menu);
+
+    return ST_BUSRIDE_EXIT;
 }
 
-GameState scene_game_over(Game* g) {
-    return ST_QUIT_ALPHA;
+GameState scene_busride_littlebuddy(Game* g) {
+
+    return ST_BUSRIDE_EXIT;
 }
 
-GameState scene_quit_alpha(Game* g) {
+GameState scene_gameover(Game* g) {
+    return ST_BUSRIDE_EXIT;
+}
+
+GameState scene_quitalpha(Game* g) {
     top_panel(g->ui.panels[QUIT_ALPHA_INDEX]);
     update_panels();
     doupdate();
@@ -282,7 +319,6 @@ GameState scene_quit_alpha(Game* g) {
         wPrintToCenter_Offsetf(outro, -2, "Your game ends here, %s.", PLAYER.name);
         wPrintToCenter_Offsetf(outro, -1, "This game is in active development.");
         wPrintToCenter_Offsetf(outro, 0, "For inquiries, contact me at:");
-
     )
 
     BLOCK(outro, CYAN_ON_BLACK | A_UNDERLINE,
@@ -322,11 +358,11 @@ static bool yes_no_menu(WINDOW* parent, int y, int x) {
     menu* new_menu = initmenu(options);
 
     curs_set(0);
-    //keypad(parent, TRUE);
     OptionSelected picked = poll_menu(menu_win, new_menu);
     update_panels();
     doupdate();
     delete_menu(new_menu);
+    wp_delete(menu_win);
 
     if (picked.idx == 0) return TRUE;
     return FALSE;
