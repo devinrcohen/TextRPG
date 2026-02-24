@@ -52,15 +52,18 @@ typedef struct {
 
 typedef enum {
     ST_TITLE,
-    ST_PANEL_TEST,
-    ST_ASK_NAME,
+    ST_PANELTEST,
+    ST_ASKNAME,
     ST_BEDROOM,
-    ST_GET_DRESSED,
-    ST_BUS_RIDE,
-    ST_EMPTY_SEAT,
-    ST_GAME_OVER,
+    ST_GETDRESSED,
+    ST_BUSRIDE,
+        ST_BUSRIDE_START,
+        ST_BUSRIDE_EMPTYSEAT,
+        ST_BUSRIDE_LITTLEBUDDY,
+        ST_BUSRIDE_EXIT,
+    ST_GAMEOVER,
     ST_QUIT,
-    ST_QUIT_ALPHA
+    ST_QUITALPHA
 } GameState;
 
 typedef enum {
@@ -82,11 +85,16 @@ void game_reset_to_new_run(Game*);
 
 /* scene functions */
 GameState scene_title(Game*);
-GameState scene_panel_test(Game*);
-GameState scene_ask_name(Game*);
+GameState scene_paneltest(Game*);
+GameState scene_askname(Game*);
 GameState scene_bedroom(Game*);
-GameState scene_get_dressed(Game*);
-GameState scene_bus_ride(Game*);
-GameState scene_empty_seat(Game*);
-GameState scene_game_over(Game*);
-GameState scene_quit_alpha(Game*);
+GameState scene_getdressed(Game*);
+
+/* Bus Ride Scenes */
+GameState scene_busride(Game*);
+GameState scene_busride_emptyseat(Game*);
+GameState scene_busride_littlebuddy(Game*);
+/* END Bus Ride Scenes */
+
+GameState scene_gameover(Game*);
+GameState scene_quitalpha(Game*);
