@@ -26,8 +26,9 @@ typedef struct {
 } OptionSelected;
 
 menu* initmenu(const char* const options[]);
+void mvwprintnc(WINDOW*, char, int, int, int);
 void mvwprint_menu(const menu*, WINDOW*, int, int);
 void delete_menu(menu*);
-OptionSelected poll_menu(WINDOW*, menu*);
+OptionSelected poll_menu(WINDOW*, menu*, int, int);
 
 #endif //TEXTRPG_MENU_H
