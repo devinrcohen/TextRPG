@@ -17,6 +17,7 @@
 static bool yes_no_menu(WINDOW*, int, int);
 static void print_status(WINDOW*, Game*);
 static void clear_inventory(Player*);
+static OptionSelected menu_select(WINDOW*, const char**, int, int);
 
 void game_reset_to_new_run(Game *g) {
     strcpy(PLAYER.name, "");
@@ -73,10 +74,6 @@ GameState scene_title(Game* g) {
                 break;
         }
     }
-}
-
-GameState scene_paneltest(Game* g) {
-
 }
 
 GameState scene_askname(Game* g) {
@@ -219,7 +216,7 @@ GameState scene_busride(Game* g) {
     wp_refresh(status, 0, 0);
 
     print_status(status, g);
-    DialogBlock block1, block2, block3, block4;
+    DialogBlock block1, block2, block3;
 
     dialogStart(&block1, 1, 1);
     addDialogLine(&block1, 16, 1, (RED_ON_BLACK | A_BOLD), NEXT, ">Luckily, your bus stop is only the second, so you ");
@@ -272,7 +269,7 @@ GameState scene_busride_emptyseat(Game* g) {
     wp_refresh(status, 0, 0);
 
     print_status(status, g);
-    DialogBlock block1, block2, block3, block4;
+    DialogBlock block1;
 
     dialogStart(&block1, 1, 1);
     addDialogLine(&block1, 16, 1, (RED_ON_BLACK | A_BOLD), NEXT, ">The bus hums along for about five minutes until you reach the next stop.");
@@ -283,18 +280,13 @@ GameState scene_busride_emptyseat(Game* g) {
 
     //top_panel(dialog_pan);
     const char *options[] = {"Beat it, dork!", "Sure. What's your name?", NULL};
-    WINDOW* menu1_win = derwin(dialog, 5, 20, 0, 0);
-    //box(menu1_win, 0, 0);
     menu* new_menu = initmenu(options);
-    //wp_refresh(menu1_win, 0, 0);
-    //wp_refresh(dialog, 0, 0);
     curs_set(0);
-    OptionSelected girl_answer = poll_menu(menu1_win, new_menu);
+    OptionSelected girl_answer = poll_menu(dialog, new_menu, 1, 1);
     /* Interpret results here */
-    update_panels();
-    doupdate();
     delete_menu(new_menu);
-
+    wp_refresh(dialog, 0, 0);
+    wgetch(dialog);
     return ST_BUSRIDE_EXIT;
 }
 
@@ -358,7 +350,7 @@ static bool yes_no_menu(WINDOW* parent, int y, int x) {
     menu* new_menu = initmenu(options);
 
     curs_set(0);
-    OptionSelected picked = poll_menu(menu_win, new_menu);
+    OptionSelected picked = poll_menu(menu_win, new_menu, 1, 1);
     update_panels();
     doupdate();
     delete_menu(new_menu);
@@ -366,6 +358,16 @@ static bool yes_no_menu(WINDOW* parent, int y, int x) {
 
     if (picked.idx == 0) return TRUE;
     return FALSE;
+}
+
+static OptionSelected menu_select(WINDOW* parent, const char *options[], int y, int x) {
+    menu *new_menu = initmenu(options);
+    OptionSelected picked = poll_menu(parent, new_menu, y, x);
+    update_panels();
+    doupdate();
+    delete_menu(new_menu);
+
+    return picked;
 }
 
 static void clear_inventory(Player *p) {
