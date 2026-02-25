@@ -35,7 +35,7 @@ typedef struct {
 
 enum CharacterTitle {
     BUDDY=0, // use these as indices to get characters
-    LADY_FRIEND,
+    GLASSES_GIRL,
     BULLY_KID,
     BUS_DRIVER,
     SCIENCE_TEACHER,
@@ -85,7 +85,6 @@ void game_reset_to_new_run(Game*);
 
 /* scene functions */
 GameState scene_title(Game*);
-GameState scene_paneltest(Game*);
 GameState scene_askname(Game*);
 GameState scene_bedroom(Game*);
 GameState scene_getdressed(Game*);
