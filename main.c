@@ -70,7 +70,6 @@ int main(void) {
     while (st != ST_QUIT) {
         switch (st) {
             case ST_TITLE:       st = scene_title(&game);        break; // --> ST_ASKNAME
-            case ST_PANELTEST:   st = scene_paneltest(&game);    break;
             case ST_ASKNAME:     st = scene_askname(&game);      break; // --> ST_BEDROOM
             case ST_BEDROOM:     st = scene_bedroom(&game);      break; // --> ST_GETDRESSED
             case ST_GETDRESSED:  st = scene_getdressed(&game);   break; // --> ST_BUSRIDE
@@ -83,7 +82,7 @@ int main(void) {
                         default: st = ST_BUSRIDE_EXIT;
                     }
                 }
-                st = ST_GAMEOVER; // will change to actual next scene
+                st = ST_QUITALPHA; // will change to actual next scene
                 break;
             }
             case ST_BUSRIDE_EMPTYSEAT:  st = scene_busride_emptyseat(&game);   break;
