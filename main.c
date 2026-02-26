@@ -1,3 +1,5 @@
+
+
 #include <curses.h>
 #include "ui.h"
 #include "game.h"
@@ -64,34 +66,35 @@ int main(void) {
     update_panels();
     doupdate();
 
-    GameState st = ST_TITLE;
+    game.state = ST_TITLE;
+    GameState *st = &game.state;
     game_reset_to_new_run(&game);
     /* game loop */
-    while (st != ST_QUIT) {
-        switch (st) {
-            case ST_TITLE:       st = scene_title(&game);        break; // --> ST_ASKNAME
-            case ST_ASKNAME:     st = scene_askname(&game);      break; // --> ST_BEDROOM
-            case ST_BEDROOM:     st = scene_bedroom(&game);      break; // --> ST_GETDRESSED
-            case ST_GETDRESSED:  st = scene_getdressed(&game);   break; // --> ST_BUSRIDE
+    while (game.state != ST_QUIT) {
+        switch (*st) {
+            case ST_TITLE:       *st = scene_title(&game);        break; // --> ST_ASKNAME
+            case ST_ASKNAME:     *st = scene_askname(&game);      break; // --> ST_BEDROOM
+            case ST_BEDROOM:     *st = scene_bedroom(&game);      break; // --> ST_GETDRESSED
+            case ST_GETDRESSED:  *st = scene_getdressed(&game);   break; // --> ST_BUSRIDE
             case ST_BUSRIDE: { // -------------------------> _EMPTYSEAT ---------> ST_BUSRIDE_EXIT
-                st = scene_busride(&game); //      `----> _LITTLEBUDDY ----'
-                while (st != ST_BUSRIDE_EXIT) {
-                    switch (st) {
-                        case ST_BUSRIDE_EMPTYSEAT:      st = scene_busride_emptyseat(&game); break;   // ____
-                        case ST_BUSRIDE_LITTLEBUDDY:    st = scene_busride_littlebuddy(&game); break; // ____\--> ST_BUSRIDE_EXIT
-                        default: st = ST_BUSRIDE_EXIT;
+                *st = scene_busride(&game); //      \----> _LITTLEBUDDY ----/
+                while (*st != ST_BUSRIDE_EXIT) {
+                    switch (*st) {
+                        case ST_BUSRIDE_EMPTYSEAT:      *st = scene_busride_emptyseat(&game); break;   // ____
+                        case ST_BUSRIDE_LITTLEBUDDY:    *st = scene_busride_littlebuddy(&game); break; // ____\--> ST_BUSRIDE_EXIT
+                        default: *st = ST_BUSRIDE_EXIT;
                     }
                 }
-                st = ST_QUITALPHA; // will change to actual next scene
+                *st = ST_QUITALPHA; // will change to actual next scene
                 break;
             }
-            case ST_BUSRIDE_EMPTYSEAT:  st = scene_busride_emptyseat(&game);   break;
-            case ST_GAMEOVER:   st = scene_gameover(&game);    break;
-            case ST_QUITALPHA:  st = scene_quitalpha(&game);   break;
-            default:             st = ST_QUIT;                   break;
+            case ST_BUSRIDE_EMPTYSEAT:  *st = scene_busride_emptyseat(&game);   break;
+            case ST_GAMEOVER:   *st = scene_gameover(&game);    break;
+            case ST_QUITALPHA:  *st = scene_quitalpha(&game);   break;
+            default:             *st = ST_QUIT;                   break;
         }
     }
-
+    save_game(&game);
     ui_shutdown();
 
     return 0;
