@@ -2,39 +2,36 @@
 // Created by devinrcohen on 2/12/26.
 //
 
-#include "game.h"
 
-#include "menu.h"
 #include <string.h>
 
+#include "game.h"
 #include "ui.h"
+#include "menu.h"
 
-#define PLAYER (g->player)
-#define WINDOWS (g->ui.windows)
-#define PANELS (g->ui.panels)
+
 /* lifecycle helpers */
-
 static bool yes_no_menu(WINDOW*, int, int);
 static void print_status(WINDOW*, Game*);
 static void clear_inventory(Player*);
-static OptionSelected menu_select(WINDOW*, const char**, int, int);
 
 void game_reset_to_new_run(Game *g) {
-    strcpy(PLAYER.name, "");
-    PLAYER.health = 3;
-    PLAYER.maxHealth = 10;
-    PLAYER.popularity = 0;
-    PLAYER.money = 0;
+    strcpy(g->player.name, "");
+    g->player.health = 3;
+    g->player.maxHealth = 10;
+    g->player.fear = 0;
+    g->player.popularity = 0;
+    g->player.money = 0;
     for (int i=0; i < NUMBER_OF_CHARACTERS; ++i) {
         strcpy(g->characters[i].name, "");
         g->characters[i].met = false;
     }
-    clear_inventory(&PLAYER);
+    clear_inventory(&g->player);
 }
 
 /* scene functions */
 GameState scene_title(Game* g) {
-    WINDOW* main = WINDOWS[INTRO_INDEX];
+    WINDOW* main = g->ui.windows[INTRO_INDEX];
     CURSOR_OFF;
 
     BLOCK(main, A_UNDERLINE | RED_ON_WHITE | A_REVERSE | A_BOLD,
@@ -77,9 +74,9 @@ GameState scene_title(Game* g) {
 }
 
 GameState scene_askname(Game* g) {
-    WINDOW* dialog = WINDOWS[DIALOG_INDEX];
-    WINDOW* status = WINDOWS[STATUS_INDEX];
-    PANEL* intro_pan = PANELS[INTRO_INDEX];
+    WINDOW* dialog = g->ui.windows[DIALOG_INDEX];
+    WINDOW* status = g->ui.windows[STATUS_INDEX];
+    PANEL* intro_pan = g->ui.panels[INTRO_INDEX];
     bottom_panel(intro_pan);
     update_panels();
     doupdate();
@@ -91,7 +88,7 @@ BLOCK(dialog, RED_ON_BLACK | A_BOLD,
     CURSOR_STRONG;
 )
 BLOCK(dialog, WHITE_ON_BLACK,
-    wgetnstr(dialog, PLAYER.name, 20);
+    wgetnstr(dialog, g->player.name, 20);
     CURSOR_OFF;
 )
     noecho();
@@ -101,9 +98,9 @@ BLOCK(dialog, WHITE_ON_BLACK,
 }
 
 GameState scene_bedroom(Game* g) {
-    WINDOW* main = WINDOWS[MAIN_INDEX];
-    PANEL* intro_pan = PANELS[INTRO_INDEX];
-    PANEL* main_pan = PANELS[MAIN_INDEX];
+    WINDOW* main = g->ui.windows[MAIN_INDEX];
+    PANEL* intro_pan = g->ui.panels[INTRO_INDEX];
+    PANEL* main_pan = g->ui.panels[MAIN_INDEX];
 
     bottom_panel(intro_pan);
     top_panel(main_pan);
@@ -115,8 +112,8 @@ GameState scene_bedroom(Game* g) {
 
     dialogStart(&block1, 1, 1);
     addDialogLine(&block1, 0,   0, (RED_ON_BLACK | A_BOLD),   NEXT,  "Mahm: ");
-    addDialogLine(&block1, 16,  1, (WHITE_ON_BLACK),          WAIT, "\"%s, it's time to wake up!!\"", PLAYER.name);
-    addDialogLine(&block1, 0,   0, (CYAN_ON_BLACK | A_BOLD),   NEXT,  "%s: ", PLAYER.name);
+    addDialogLine(&block1, 16,  1, (WHITE_ON_BLACK),          WAIT, "\"%s, it's time to wake up!!\"", g->player.name);
+    addDialogLine(&block1, 0,   0, (CYAN_ON_BLACK | A_BOLD),   NEXT,  "%s: ", g->player.name);
     addDialogLine(&block1, /*128*/64, 1, (WHITE_ON_BLACK),    NEXT,  "\"unnnhhhh...\"");
     mvwDialogTrickle(main, &block1);
 
@@ -127,7 +124,7 @@ GameState scene_bedroom(Game* g) {
         wp_refresh(main, 0, 0);
         dialogStart(&block2, 1, 1);
         addDialogLine(&block2, 0,   0, (RED_ON_BLACK | A_BOLD), NEXT,  "Mahm: ");
-        addDialogLine(&block2, 16,  1, (WHITE_ON_BLACK),         NEXT, "\"So %s... were you planning on going to school today?\"", PLAYER.name);
+        addDialogLine(&block2, 16,  1, (WHITE_ON_BLACK),         NEXT, "\"So %s... were you planning on going to school today?\"", g->player.name);
         mvwDialogTrickle(main, &block2);
 
         // Place menu under the dialog; adjust coordinates to taste
@@ -148,9 +145,9 @@ GameState scene_bedroom(Game* g) {
 }
 
 GameState scene_getdressed(Game* g) {
-    WINDOW* dialog = WINDOWS[DIALOG_INDEX];
-    WINDOW* status = WINDOWS[STATUS_INDEX];
-    WINDOW* main = WINDOWS[MAIN_INDEX];
+    WINDOW* dialog = g->ui.windows[DIALOG_INDEX];
+    WINDOW* status = g->ui.windows[STATUS_INDEX];
+    WINDOW* main = g->ui.windows[MAIN_INDEX];
 
     wp_refresh(main, 0, 0);
     wp_refresh(dialog, 0, 0);
@@ -177,7 +174,7 @@ GameState scene_getdressed(Game* g) {
         addDialogLine(&block3, 0, 0, (CYAN_ON_BLACK | A_BOLD), NEXT, "+3 popularity points gained!");
         mvwDialogTrickle(main, &block3);
 
-        PLAYER.popularity += 3;
+        g->player.popularity += 3;
         wp_refresh(dialog, 0, 0);
         delay_ms(50);
         print_status(status, g);
@@ -192,7 +189,7 @@ GameState scene_getdressed(Game* g) {
         addDialogLine(&block3, 16, 0, (RED_ON_BLACK | A_BOLD), WAIT, " and chomp on it as you run out the door.");
         mvwDialogTrickle(main, &block3);
 
-        PLAYER.health += 7;
+        g->player.health += 7;
         wp_refresh(dialog, 0, 0);
         delay_ms(50);
         print_status(status, g);
@@ -207,9 +204,9 @@ GameState scene_getdressed(Game* g) {
 }
 
 GameState scene_busride(Game* g) {
-    WINDOW* dialog = WINDOWS[DIALOG_INDEX];
-    WINDOW* status = WINDOWS[STATUS_INDEX];
-    WINDOW* main = WINDOWS[MAIN_INDEX];
+    WINDOW* dialog = g->ui.windows[DIALOG_INDEX];
+    WINDOW* status = g->ui.windows[STATUS_INDEX];
+    WINDOW* main = g->ui.windows[MAIN_INDEX];
 
     wp_refresh(main, 0, 0);
     wp_refresh(dialog, 0, 0);
@@ -259,10 +256,10 @@ GameState scene_busride(Game* g) {
 }
 
 GameState scene_busride_emptyseat(Game* g) {
-    WINDOW* dialog = WINDOWS[DIALOG_INDEX];
-    WINDOW* status = WINDOWS[STATUS_INDEX];
-    WINDOW* main = WINDOWS[MAIN_INDEX];
-    //PANEL* dialog_pan = PANELS[DIALOG_INDEX];
+    WINDOW* dialog = g->ui.windows[DIALOG_INDEX];
+    WINDOW* status = g->ui.windows[STATUS_INDEX];
+    WINDOW* main = g->ui.windows[MAIN_INDEX];
+    //PANEL* dialog_pan = g->ui.panels[DIALOG_INDEX];
 
     wp_refresh(main, 0, 0);
     wp_refresh(dialog, 0, 0);
@@ -274,19 +271,59 @@ GameState scene_busride_emptyseat(Game* g) {
     dialogStart(&block1, 1, 1);
     addDialogLine(&block1, 16, 1, (RED_ON_BLACK | A_BOLD), NEXT, ">The bus hums along for about five minutes until you reach the next stop.");
     addDialogLine(&block1, 16, 2, (RED_ON_BLACK | A_BOLD), WAIT, " The door creaks open and on walks a girl with glasses and a ponytail.");
-    addDialogLine(&block1, 16, 0, (CYAN_ON_BLACK | A_BOLD), NEXT, "???: ");
+    addDialogLine(&block1, 0, 0, (CYAN_ON_BLACK | A_BOLD), NEXT, "???: ");
     addDialogLine(&block1, 16, 1, (RED_ON_BLACK | A_BOLD), NEXT, "\"Excuse me, may I sit here?\" she asks sweetly.");
     mvwDialogTrickle(main, &block1);
 
-    //top_panel(dialog_pan);
     const char *options[] = {"Beat it, dork!", "Sure. What's your name?", NULL};
     menu* new_menu = initmenu(options);
     curs_set(0);
     OptionSelected girl_answer = poll_menu(dialog, new_menu, 1, 1);
-    /* Interpret results here */
+    wp_refresh(main, 0, 0);
     delete_menu(new_menu);
     wp_refresh(dialog, 0, 0);
+
+    /* Interpret results here */
+    if (girl_answer.idx == 0) { // Beat it, dork!
+        g->characters[GLASSES_GIRL] = (Character) { "???", FALSE };
+        DialogBlock block2;
+        dialogStart(&block2, 1, 1);
+        addDialogLine(&block2, 0, 0, (CYAN_ON_BLACK | A_BOLD), NEXT, "???: ");
+        addDialogLine(&block2, 16, 1, (RED_ON_BLACK | A_BOLD), WAIT, "*sniff sniff* get bent, prick!");
+        addDialogLine(&block2, 16, 1, (RED_ON_BLACK | A_BOLD), WAIT, ">You made a girl cry. What's wrong with you?");
+        mvwDialogTrickle(main, &block2);
+
+        delay_ms(50);
+        DialogBlock block3;
+        dialogStart(&block3, 5, 1);
+        addDialogLine(&block3, 0, 1, (CYAN_ON_BLACK | A_BOLD), NEXT, "-3 popularity points");
+        addDialogLine(&block3, 0, 1, (CYAN_ON_BLACK | A_BOLD), NEXT, "+3 fear points");
+        mvwDialogTrickle(main, &block3);
+        g->player.popularity -= 3;
+        g->player.fear += 3;
+
+        print_status(status, g);
+        update_panels();
+        doupdate();
+
+        wgetch(main);
+        wp_refresh(main, 0, 0);
+
+        DialogBlock block4;
+        dialogStart(&block4, 1, 1);
+        addDialogLine(&block4, 16, 1, (RED_ON_BLACK | A_BOLD), NEXT, ">The poor girl moves on and a smelly fat kid takes the seat.");
+        addDialogLine(&block4, 16, 1, (RED_ON_BLACK | A_BOLD), NEXT, ">He falls asleep and drools all over your shoulder, while");
+        addDialogLine(&block4, 16, 1, (RED_ON_BLACK | A_BOLD), WAIT, " your eyes start to water at his stench.");
+        mvwDialogTrickle(main, &block4);
+
+        update_panels();
+        doupdate();
+    } else {
+
+    }
+
     wgetch(dialog);
+
     return ST_BUSRIDE_EXIT;
 }
 
@@ -303,12 +340,12 @@ GameState scene_quitalpha(Game* g) {
     top_panel(g->ui.panels[QUIT_ALPHA_INDEX]);
     update_panels();
     doupdate();
-    WINDOW* outro = WINDOWS[QUIT_ALPHA_INDEX];
+    WINDOW* outro = g->ui.windows[QUIT_ALPHA_INDEX];
 
     CURSOR_OFF;
 
     BLOCK(outro,  CYAN_ON_BLACK | A_BOLD,
-        wPrintToCenter_Offsetf(outro, -2, "Your game ends here, %s.", PLAYER.name);
+        wPrintToCenter_Offsetf(outro, -2, "Your game ends here, %s.", g->player.name);
         wPrintToCenter_Offsetf(outro, -1, "This game is in active development.");
         wPrintToCenter_Offsetf(outro, 0, "For inquiries, contact me at:");
     )
@@ -329,16 +366,18 @@ GameState scene_quitalpha(Game* g) {
 static void print_status(WINDOW* win, Game* g) {
     wp_refresh(win, 0, 0);
 BLOCK(win, CYAN_ON_BLACK | A_BOLD,
-    mvwprintw(win, 1, 1, "%s", PLAYER.name);
+    mvwprintw(win, 1, 1, "%s", g->player.name);
 )
-    mvwprintw(win, 2, 1, "Cash: $%d", PLAYER.money);
-    mvwprintw(win, 3, 1, "Fullness: %d/%d", PLAYER.health, PLAYER.maxHealth);
-    mvwprintw(win, 4, 1, "Popularity: %d", PLAYER.popularity);
-    mvwprintw(win, 6, 1, "Inventory");
-    mvwprintw(win, 7, 1, "=========");
+    mvwprintw(win, 2, 1, "Cash: $%d", g->player.money);
+    mvwprintw(win, 3, 1, "Fullness: %d/%d", g->player.health, g->player.maxHealth);
+    mvwprintw(win, 4, 1, "Popularity: %d", g->player.popularity);
+    mvwprintw(win, 5, 1, "Fear: %d", g->player.fear);
+    mvwprintw(win, 7, 1, "Inventory");
+    mvwprintw(win, 8, 1, "=========");
     for (int i = 0; i < TOTAL_ITEMS/10; i++) {
-        if (strcmp("", PLAYER.inventory[i].name))
-            mvwprintw(win, 8+i, 1, "%s:\t%dx", PLAYER.inventory[i].name, PLAYER.inventory[i].quantity);
+        if (strcmp("", g->player.inventory[i].name)) {
+            mvwprintw(win, 9+i, 1, "%s:\t%dx", g->player.inventory[i].name, g->player.inventory[i].quantity);
+        }
     }
 }
 
@@ -360,19 +399,46 @@ static bool yes_no_menu(WINDOW* parent, int y, int x) {
     return FALSE;
 }
 
-static OptionSelected menu_select(WINDOW* parent, const char *options[], int y, int x) {
-    menu *new_menu = initmenu(options);
-    OptionSelected picked = poll_menu(parent, new_menu, y, x);
-    update_panels();
-    doupdate();
-    delete_menu(new_menu);
-
-    return picked;
-}
-
 static void clear_inventory(Player *p) {
     for (int i = 0; i < TOTAL_ITEMS; ++i) {
         strcpy(p->inventory[i].name, "");
         p->inventory[i].quantity = 0;
     }
 }
+
+#ifdef ALLOW_SAVE_GAME
+void save_game(Game* g) {
+    cJSON *save = NULL;
+    cJSON *character_array = NULL;
+    char *out_string = NULL;
+
+    GameState state = g->state;
+    Player player = g->player;
+    Character *characters = g->characters;
+    bool player_valid = g->player_valid;
+
+    save = cJSON_CreateObject();
+    cJSON_AddItemToObject(save, "name", cJSON_CreateString(player.name));
+    cJSON_AddNumberToObject(save, "popularity", player.popularity);
+    cJSON_AddNumberToObject(save, "fear", player.fear);
+    cJSON_AddNumberToObject(save, "health", player.health);
+    cJSON_AddNumberToObject(save, "maxHealth", player.maxHealth);
+    cJSON_AddNumberToObject(save, "money", player.money);
+    cJSON_AddNumberToObject(save, "state", state);
+    cJSON_AddBoolToObject(save, "valid", player_valid);
+
+    character_array = cJSON_AddArrayToObject(save, "characters");
+    for (int i = 0; i < NUMBER_OF_CHARACTERS; ++i) {
+        cJSON_AddItemToArray(character_array, cJSON_CreateString(characters[i].name));
+    }
+
+    out_string = cJSON_Print(save);
+    if (out_string == NULL) {
+        fprintf(stderr, "Failed to print.");
+    } else {
+        FILE* savefile = fopen("savefile.json", "w");
+        fprintf(savefile, "%s", out_string);
+        fclose(savefile);
+    }
+}
+#endif
