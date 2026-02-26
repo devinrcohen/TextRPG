@@ -1,3 +1,4 @@
 .idea/
 cmake-build-debug/
 *debug_log.txt
+savefile.json
