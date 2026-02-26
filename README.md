@@ -5,11 +5,12 @@ Welcome to TextRPG! It's your first day of school. Will you be a preppie or a jo
 ### Prerequisites
 This project uses the ncurses ecosystem:
 
-* Headers: ```ncurses.h``` (or ```nurses.h```), ```panel.h```, ```menu.h```
-* Libraries: ```ncurses``` (or ```curses```), ```panel```, ```menu```
+* Headers: ```ncurses.h``` (or ```nurses.h```), ```panel.h```, ```menu.h```, ```cJSON.h```
+* Libraries: ```ncurses``` (or ```curses```), ```panel```, ```menu```, ```cjson```
 
 On most systems, panel and menu are shipped as part of ncurses. You may compile TextRPG with CMake or directly from the command line.
-### Linux 
+### Linux
+Get and install the [cJSON](https://github.com/DaveGamble/cJSON?tab=readme-ov-file#building) header and library.
 #### Debian / Ubuntu
 ##### Install Dependencies
 ```Bash
@@ -85,4 +86,12 @@ gcc -std=c11 -O2 -Wall -Wextra \
 ```
 
 ### Windows
-Instructions coming soon.
+Get and install the cJSON header and library using the [vcpkg](https://github.com/Microsoft/vcpkg) package manager.
+```Bash
+git clone https://github.com/Microsoft/vcpkg.git
+cd vcpkg
+./bootstrap-vcpkg.sh
+./vcpkg integrate install
+vcpkg install cjson
+```
+Further instructions coming soon.
