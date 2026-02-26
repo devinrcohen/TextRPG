@@ -91,10 +91,9 @@ int main(void) {
             case ST_BUSRIDE_EMPTYSEAT:  *st = scene_busride_emptyseat(&game);   break;
             case ST_GAMEOVER:   *st = scene_gameover(&game);    break;
             case ST_QUITALPHA:  *st = scene_quitalpha(&game);   break;
-            default:             *st = ST_QUIT;                   break;
+            default:             *st = ST_QUITALPHA;                   break;
         }
     }
-    save_game(&game);
     ui_shutdown();
 
     return 0;
