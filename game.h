@@ -4,6 +4,12 @@
 
 #pragma once
 
+#define ALLOW_SAVE_GAME
+
+#ifdef ALLOW_SAVE_GAME
+#include <cjson/cJSON.h>
+#endif
+
 #define TOTAL_ITEMS 100
 #define ITEM_NAME_LENGTH 20
 #define CHARACTER_NAME_LENGTH 20
@@ -27,6 +33,7 @@ typedef struct {
 typedef struct {
     char name[CHARACTER_NAME_LENGTH];
     int popularity;
+    int fear;
     int health;
     int maxHealth;
     int money;
@@ -78,6 +85,7 @@ typedef struct {
     GameOverReason go_reason;
     bool player_valid;
     Character characters[NUMBER_OF_CHARACTERS];
+    GameState state;
 } Game;
 
 /* lifecycle helpers */
@@ -97,3 +105,7 @@ GameState scene_busride_littlebuddy(Game*);
 
 GameState scene_gameover(Game*);
 GameState scene_quitalpha(Game*);
+
+#ifdef ALLOW_SAVE_GAME
+void save_game(Game*);
+#endif
