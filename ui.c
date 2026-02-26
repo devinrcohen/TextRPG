@@ -292,14 +292,16 @@ void delete_textedit(TextEdit* te) {
 }
 
 void wp_refresh(WINDOW* win, char v, char h) {
-    wclear(win);
+    //wclear(win);
+    werase(win);
     box(win, v, h);
     update_panels();
     doupdate();
 }
 
 void wp_delete(WINDOW* win) {
-    wclear(win);
+    //wclear(win);
+    werase(win);
     delwin(win);
     update_panels();
     doupdate();
