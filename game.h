@@ -10,6 +10,7 @@
 #include <cjson/cJSON.h>
 #endif
 
+#define MAX_SAVE_FILE_LENGTH 1000
 #define TOTAL_ITEMS 100
 #define ITEM_NAME_LENGTH 20
 #define CHARACTER_NAME_LENGTH 20
@@ -108,4 +109,5 @@ GameState scene_quitalpha(Game*);
 
 #ifdef ALLOW_SAVE_GAME
 void save_game(Game*);
+void load_game(Game*, const char*);
 #endif
