@@ -67,7 +67,9 @@ typedef enum {
     ST_BUSRIDE,
         ST_BUSRIDE_START,
         ST_BUSRIDE_EMPTYSEAT,
+            ST_BUSRIDE_EMPTYSEAT_GIRLCONVO,
         ST_BUSRIDE_LITTLEBUDDY,
+            ST_BUSRIDE_LITTLEBUDDY_BUDDYCONVO,
         ST_BUSRIDE_EXIT,
     ST_GAMEOVER,
     ST_QUIT,
@@ -101,13 +103,15 @@ GameState scene_getdressed(Game*);
 /* Bus Ride Scenes */
 GameState scene_busride(Game*);
 GameState scene_busride_emptyseat(Game*);
+GameState scene_busride_emptyseat_girlconvo(Game*);
 GameState scene_busride_littlebuddy(Game*);
+GameState scene_busride_littlebuddy_buddyconvo(Game*);
 /* END Bus Ride Scenes */
 
 GameState scene_gameover(Game*);
 GameState scene_quitalpha(Game*);
 
 #ifdef ALLOW_SAVE_GAME
-void save_game(Game*);
+void save_game(Game*, const char*);
 void load_game(Game*, const char*);
 #endif
