@@ -72,23 +72,22 @@ int main(void) {
     /* game loop */
     while (game.state != ST_QUIT) {
         switch (*st) {
+            /* Intro Screen */
             case ST_TITLE:       *st = scene_title(&game);        break; // --> ST_ASKNAME
+
+            /* Adventure starts */
             case ST_ASKNAME:     *st = scene_askname(&game);      break; // --> ST_BEDROOM
             case ST_BEDROOM:     *st = scene_bedroom(&game);      break; // --> ST_GETDRESSED
             case ST_GETDRESSED:  *st = scene_getdressed(&game);   break; // --> ST_BUSRIDE
-            case ST_BUSRIDE: { // -------------------------> _EMPTYSEAT ---------> ST_BUSRIDE_EXIT
-                *st = scene_busride(&game); //      \----> _LITTLEBUDDY ----/
-                while (*st != ST_BUSRIDE_EXIT) {
-                    switch (*st) {
-                        case ST_BUSRIDE_EMPTYSEAT:      *st = scene_busride_emptyseat(&game); break;   // ____
-                        case ST_BUSRIDE_LITTLEBUDDY:    *st = scene_busride_littlebuddy(&game); break; // ____\--> ST_BUSRIDE_EXIT
-                        default: *st = ST_BUSRIDE_EXIT;
-                    }
-                }
-                *st = ST_QUITALPHA; // will change to actual next scene
-                break;
-            }
-            case ST_BUSRIDE_EMPTYSEAT:  *st = scene_busride_emptyseat(&game);   break;
+
+            /* Bus ride scenes */
+            case ST_BUSRIDE:                *st = scene_busride(&game);              break;
+            case ST_BUSRIDE_EMPTYSEAT:      *st = scene_busride_emptyseat(&game);    break;
+            case ST_BUSRIDE_EMPTYSEAT_GIRLCONVO: *st = scene_busride_emptyseat_girlconvo(&game); break;
+            case ST_BUSRIDE_LITTLEBUDDY:    *st = scene_busride_littlebuddy(&game);  break;
+            case ST_BUSRIDE_LITTLEBUDDY_BUDDYCONVO: *st = scene_busride_littlebuddy_buddyconvo(&game); break;
+
+            /* end of game */
             case ST_GAMEOVER:   *st = scene_gameover(&game);    break;
             case ST_QUITALPHA:  *st = scene_quitalpha(&game);   break;
             default:             *st = ST_QUITALPHA;                   break;
