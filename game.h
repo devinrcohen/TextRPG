@@ -7,7 +7,7 @@
 #define ALLOW_SAVE_GAME
 
 #ifdef ALLOW_SAVE_GAME
-#include <cjson/cJSON.h>
+#include "deps/cJSON.h"
 #endif
 
 #define MAX_SAVE_FILE_LENGTH 1000
