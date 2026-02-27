@@ -14,6 +14,7 @@
 static bool yes_no_menu(WINDOW*, int, int);
 static void print_status(WINDOW*, Game*);
 static void clear_inventory(Player*);
+static GameState poll_end_scene(WINDOW*, Game*, GameState);
 
 void game_reset_to_new_run(Game *g) {
     strcpy(g->player.name, "");
@@ -118,6 +119,7 @@ BLOCK(dialog, WHITE_ON_BLACK,
 
 GameState scene_bedroom(Game* g) {
     WINDOW* main = g->ui.windows[MAIN_INDEX];
+    WINDOW* status = g->ui.windows[STATUS_INDEX];
     PANEL* intro_pan = g->ui.panels[INTRO_INDEX];
     PANEL* main_pan = g->ui.panels[MAIN_INDEX];
 
@@ -125,9 +127,10 @@ GameState scene_bedroom(Game* g) {
     top_panel(main_pan);
 
     wp_refresh(main, 0, 0);
+    print_status(status, g);
 
     wattron(main, WHITE_ON_BLACK);
-    DialogBlock block1, block2;
+    DialogBlock block1, block2, block3, block4;
 
     dialogStart(&block1, 1, 1);
     addDialogLine(&block1, 0,   0, (RED_ON_BLACK | A_BOLD),   NEXT,  "Mahm: ");
@@ -154,13 +157,19 @@ GameState scene_bedroom(Game* g) {
         }
         wp_refresh(main, 0, 0);
 
-        DialogBlock block3;
         dialogStart(&block3, 1, 1);
         addDialogLine(&block3, 0,   0, (RED_ON_BLACK | A_BOLD), NEXT,  "Mahm: ");
-        addDialogLine(&block3, 16,  1, (WHITE_ON_BLACK),          WAIT, "\"Um, I don't think so...\"");
+        addDialogLine(&block3, 16,  1, (WHITE_ON_BLACK),          NEXT, "\"Um, I don't think so...\"");
         mvwDialogTrickle(main, &block3);
     }
-    return ST_GETDRESSED;
+
+    wp_refresh(main, 0, 0);
+    dialogStart(&block4, 1, 1);
+    addDialogLine(&block4, 0,   0, (RED_ON_BLACK | A_BOLD), NEXT,  "Mahm: ");
+    addDialogLine(&block4, 16,  1, (WHITE_ON_BLACK),          NEXT, "\"Well, get a move on then!\"");
+    mvwDialogTrickle(main, &block4);
+
+    return poll_end_scene(main, g, ST_GETDRESSED);
 }
 
 GameState scene_getdressed(Game* g) {
@@ -170,6 +179,7 @@ GameState scene_getdressed(Game* g) {
 
     wp_refresh(main, 0, 0);
     wp_refresh(dialog, 0, 0);
+    print_status(status, g);
 
     DialogBlock block1, block2, block3, block4;
 
@@ -215,11 +225,11 @@ GameState scene_getdressed(Game* g) {
 
         dialogStart(&block4, 4, 1);
         addDialogLine(&block4, 0, 2, (CYAN_ON_BLACK | A_BOLD), WAIT, "Hunger curbed.");
-        addDialogLine(&block4, 16, 0, (RED_ON_BLACK | A_BOLD), WAIT, ">You get on the bus with a full stomach and clear head.");
+        addDialogLine(&block4, 16, 0, (RED_ON_BLACK | A_BOLD), NEXT, ">You get on the bus with a full stomach and clear head.");
         mvwDialogTrickle(main, &block4);
     }
 
-    return ST_BUSRIDE;
+    return poll_end_scene(main, g, ST_BUSRIDE);
 }
 
 GameState scene_busride(Game* g) {
@@ -270,8 +280,7 @@ GameState scene_busride(Game* g) {
 
     wp_refresh(dialog, 0, 0);
     print_status(status, g);
-
-    return ST_BUSRIDE_LITTLEBUDDY;
+    return poll_end_scene(main, g, ST_BUSRIDE_LITTLEBUDDY);
 }
 
 GameState scene_busride_emptyseat(Game* g) {
@@ -332,7 +341,7 @@ GameState scene_busride_emptyseat(Game* g) {
         dialogStart(&block4, 1, 1);
         addDialogLine(&block4, 16, 1, (RED_ON_BLACK | A_BOLD), NEXT, ">The poor girl moves on and a smelly fat kid takes the seat.");
         addDialogLine(&block4, 16, 1, (RED_ON_BLACK | A_BOLD), NEXT, ">He falls asleep and drools all over your shoulder, while");
-        addDialogLine(&block4, 16, 1, (RED_ON_BLACK | A_BOLD), WAIT, " your eyes start to water at his stench.");
+        addDialogLine(&block4, 16, 1, (RED_ON_BLACK | A_BOLD), NEXT, " your eyes start to water at his stench.");
         mvwDialogTrickle(main, &block4);
 
         update_panels();
@@ -341,18 +350,71 @@ GameState scene_busride_emptyseat(Game* g) {
 
     }
 
-    wgetch(dialog);
+    return poll_end_scene(main, g, ST_QUITALPHA);
+}
 
-    return ST_BUSRIDE_EXIT;
+GameState scene_busride_emptyseat_girlconvo(Game* g) {
+    WINDOW* dialog = g->ui.windows[DIALOG_INDEX];
+    WINDOW* status = g->ui.windows[STATUS_INDEX];
+    WINDOW* main = g->ui.windows[MAIN_INDEX];
+
+    wp_refresh(main, 0, 0);
+    wp_refresh(dialog, 0, 0);
+    wp_refresh(status, 0, 0);
+
+    print_status(status, g);
+
+    /* scene stuff goes here */
+
+    return poll_end_scene(main, g, ST_QUITALPHA);
 }
 
 GameState scene_busride_littlebuddy(Game* g) {
+    WINDOW* dialog = g->ui.windows[DIALOG_INDEX];
+    WINDOW* status = g->ui.windows[STATUS_INDEX];
+    WINDOW* main = g->ui.windows[MAIN_INDEX];
 
-    return ST_BUSRIDE_EXIT;
+    wp_refresh(main, 0, 0);
+    wp_refresh(dialog, 0, 0);
+    wp_refresh(status, 0, 0);
+
+    print_status(status, g);
+
+    /* scene stuff goes here */
+
+    return poll_end_scene(main, g, ST_BUSRIDE_LITTLEBUDDY_BUDDYCONVO);
+}
+
+GameState scene_busride_littlebuddy_buddyconvo(Game* g) {
+    WINDOW* dialog = g->ui.windows[DIALOG_INDEX];
+    WINDOW* status = g->ui.windows[STATUS_INDEX];
+    WINDOW* main = g->ui.windows[MAIN_INDEX];
+
+    wp_refresh(main, 0, 0);
+    wp_refresh(dialog, 0, 0);
+    wp_refresh(status, 0, 0);
+
+    print_status(status, g);
+
+    /* scene stuff goes here */
+
+    return poll_end_scene(main, g, ST_QUITALPHA);
 }
 
 GameState scene_gameover(Game* g) {
-    return ST_BUSRIDE_EXIT;
+    WINDOW* dialog = g->ui.windows[DIALOG_INDEX];
+    WINDOW* status = g->ui.windows[STATUS_INDEX];
+    WINDOW* main = g->ui.windows[MAIN_INDEX];
+
+    wp_refresh(main, 0, 0);
+    wp_refresh(dialog, 0, 0);
+    wp_refresh(status, 0, 0);
+
+    print_status(status, g);
+
+    /* scene stuff goes here */
+
+    return poll_end_scene(main, g, ST_QUITALPHA);
 }
 
 GameState scene_quitalpha(Game* g) {
@@ -425,8 +487,49 @@ static void clear_inventory(Player *p) {
     }
 }
 
+static GameState poll_end_scene(WINDOW* win, Game* g, GameState next_state) {
+    int maxRows = getmaxy(win);
+    wattron(win, A_BOLD);
+    mvwprintw(win, maxRows-2, 1, "[Enter] to continue...");
+    wattroff(win, A_BOLD);
+    while (1) {
+        int ch = wgetch(win);
+        switch (ch) {
+            case '\n':
+            case '\r':
+            case KEY_ENTER:
+                /*update_panels();
+                doupdate();*/
+                return next_state;
+            case KEY_ESC_CUSTOM:
+            case 'q':
+            case 'Q':
+                /*update_panels();
+                doupdate();*/
+                return ST_QUITALPHA;
 #ifdef ALLOW_SAVE_GAME
-void save_game(Game* g) {
+            case 'l':
+            case 'L':
+                load_game(g, "savefile.json");
+                bottom_panel(g->ui.panels[INTRO_INDEX]);
+                update_panels();
+                doupdate();
+                return g->state;
+            case 's':
+            case 'S':
+            case KEY_F(1):
+                g->state = next_state;
+                save_game(g, "savefile.json");
+#endif
+            default:
+                break;
+        }
+    }
+}
+
+#ifdef ALLOW_SAVE_GAME
+void save_game(Game* g, const char* filename) {
+    FILE* savefile = NULL;
     cJSON *save = NULL;
     cJSON *character_array = NULL;
     char *out_string = NULL;
@@ -451,13 +554,11 @@ void save_game(Game* g) {
         cJSON_AddItemToArray(character_array, cJSON_CreateString(characters[i].name));
     }
 
-    out_string = cJSON_Print(save);
-    if (out_string == NULL) {
-        fprintf(stderr, "Failed to print.");
-    } else {
-        FILE* savefile = fopen("asavefile.json", "w");
+    if ((savefile = fopen(filename, "w")) != NULL && (out_string = cJSON_Print(save)) != NULL) {
         fprintf(savefile, "%s", out_string);
         fclose(savefile);
+    } else {
+        fprintf(stderr, "Failed to save.");
     }
 }
 
